@@ -13,8 +13,12 @@ WHITE = (225,225,225)
 ROW_COUNT = 6
 COLUMN_COUNT = 7
 MAX_TURNS = ROW_COUNT * COLUMN_COUNT
-SQUARESIZE = 100
-RADIUS = int(SQUARESIZE/2 - 5)
+SQUARESIZE = 50
+HALF_SQUARE = int(SQUARESIZE / 2)
+RADIUS = int(HALF_SQUARE - 5)
+
+BOARD_OFFSET_X = 4.5
+BOARD_OFFSET_Y = 3
 
 wins_pink = 0
 wins_white = 0
@@ -22,8 +26,8 @@ game_over = False
 turn = 0
 anz_turns = 0
 
-width = COLUMN_COUNT * SQUARESIZE
-height = (ROW_COUNT+2) * SQUARESIZE
+width = 16 * SQUARESIZE
+height = 9 * SQUARESIZE
 
 size = (width, height)
 
@@ -75,58 +79,65 @@ def winning_move(board, piece):
                 return True
 
 def draw_board(board):
-    for c in range(COLUMN_COUNT):
-        for r in range(ROW_COUNT):
-            pygame.draw.rect(screen, GREY, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
-            pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+
+    flipped_board = np.flip(board, 0)
 
     for c in range(COLUMN_COUNT):
         for r in range(ROW_COUNT):
 
-            if board[r][c] == 1:
-                pygame.draw.circle(screen, PINK, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+            xpos = int(c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
+            ypos = int(r * SQUARESIZE + BOARD_OFFSET_Y * SQUARESIZE)
 
-            elif board[r][c] == 2:
-                pygame.draw.circle(screen, WHITE, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+            pygame.draw.rect(screen, GREY, (xpos, ypos, SQUARESIZE, SQUARESIZE))
+            
+            if flipped_board[r][c] == 1:
+                pygame.draw.circle(screen, PINK, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
 
-    # Zeilenbeschriftung
-    pygame.draw.rect(screen, BLACK, (0,int(1*SQUARESIZE), width, SQUARESIZE))
-    col_one = myfont.render("1", 1, GREY)
-    col_two = myfont.render("2", 1, GREY)
-    col_three = myfont.render("3", 1, GREY)
-    col_four = myfont.render("4", 1, GREY)
-    col_five = myfont.render("5", 1, GREY)
-    col_six = myfont.render("6", 1, GREY)
-    col_seven = myfont.render("7", 1, GREY)
-    # screen.blit(col_one, (int(SQUARESIZE*0.28,int((SQUARESIZE*0.2)+SQUARESIZE))))
-    screen.blit(col_one, (28,120))
-    screen.blit(col_two, (128,120))
-    screen.blit(col_three, (228,120))
-    screen.blit(col_four, (328,120))
-    screen.blit(col_five, (428,120))
-    screen.blit(col_six, (525,120))
-    screen.blit(col_seven, (628,120))
+            elif flipped_board[r][c] == 2:
+                pygame.draw.circle(screen, WHITE, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
 
-    pygame.display.update()
+            else:
+                pygame.draw.circle(screen, BLACK, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
+
+def draw_column_labels():
+    for c in range(COLUMN_COUNT):
+        col_number = myfont.render(str(c+1), 1, GREY)
+        
+        xpos = int(SQUARESIZE * 0.28 + c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
+        ypos = int(BOARD_OFFSET_Y * SQUARESIZE - 0.8 * SQUARESIZE)
+        
+        screen.blit(col_number, (xpos,ypos))
+
+def draw_player():
+
+    if turn == 0:
+        color = PINK
+        text = "Pink ist dran"
+
+    else:
+        color = WHITE
+        text = "Weiß ist dran"
+
+    xpos = BOARD_OFFSET_X * SQUARESIZE
+    ypos = SQUARESIZE
+
+    pygame.draw.rect(screen, BLACK, (xpos, ypos, 7 * SQUARESIZE, SQUARESIZE))
+    dran = myfont.render(text, 1, color)
+    screen.blit(dran, (int(xpos + SQUARESIZE * 0.4), int(ypos + SQUARESIZE * 0.1)))
 
 board = create_board()
 print_board(board)
 
 screen = pygame.display.set_mode(size)
 draw_board(board)
+draw_column_labels()
 pygame.display.update()
 
 while anz_turns < MAX_TURNS and not game_over:
 
-    if turn != 0:
-        pygame.draw.rect(screen, BLACK, (0,int(0*SQUARESIZE), width, SQUARESIZE))
-        dran = myfont.render("Pink ist dran", 1, PINK)
-        screen.blit(dran, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
+    draw_player()
 
-    else:
-        pygame.draw.rect(screen, BLACK, (0,int(0*SQUARESIZE), width, SQUARESIZE))
-        dran = myfont.render("Weiß ist dran", 1, WHITE)
-        screen.blit(dran, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
+    pygame.display.update()
 
     for event in pygame.event.get():
 
@@ -213,6 +224,8 @@ while anz_turns < MAX_TURNS and not game_over:
 
             print_board(board)
             draw_board(board)
+
+            pygame.display.update()
 
             turn += 1
             turn = turn % 2
