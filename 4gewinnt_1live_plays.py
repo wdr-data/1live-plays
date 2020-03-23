@@ -3,6 +3,8 @@ import pygame
 import sys
 import math
 
+# hallo
+
 GREY = (137,149,155)
 BLACK = (0,0,0)
 PINK = (255,0,153)
@@ -131,12 +133,12 @@ while anz_turns < MAX_TURNS and not game_over:
         # Programm Exit
         if event.type == pygame.QUIT:
             sys.exit()
-     
+
         if event.type == pygame.KEYDOWN:
 
             # Ask Player 1 Input
             if turn == 0:
-                
+
                 if event.key == pygame.K_1:
                     col = int(0)
                 elif event.key == pygame.K_2:
@@ -170,7 +172,7 @@ while anz_turns < MAX_TURNS and not game_over:
                 else:
                     turn -= 1
                     anz_turns -= 1
-                        
+
             # Ask Player 2 Input
             else:
 
