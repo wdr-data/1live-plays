@@ -138,6 +138,59 @@ def draw_status(wins=False, tie=False):
     text_rect = drawn_text.get_rect(center=(int(xpos + width / 2), ypos + int(height / 2)))
     screen.blit(drawn_text, text_rect)
 
+def game_loop(event):
+    
+    global turn, anz_turns, game_over
+
+    # Programm Exit
+    if event.type == pygame.QUIT:
+        sys.exit()
+
+    number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
+    if event.type == pygame.KEYDOWN and event.key in number_keys:
+
+        if event.key == pygame.K_1:
+            col = int(0)
+        elif event.key == pygame.K_2:
+            col = int(1)
+        elif event.key == pygame.K_3:
+            col = int(2)
+        elif event.key == pygame.K_4:
+            col = int(3)
+        elif event.key == pygame.K_5:
+            col = int(4)
+        elif event.key == pygame.K_6:
+            col = int(5)
+        elif event.key == pygame.K_7:
+            col = int(6)
+
+        # Ask Player 1 Input
+        if turn == 0:
+            player_number = 1
+        else:
+            player_number = 2
+
+        if is_valid_location(board, col):
+            row = get_next_open_row(board, col)
+            drop_piece(board, row, col, player_number)
+
+            if winning_move(board, player_number):
+                draw_status(wins=True)
+                wins[player_number] += 1
+                game_over = True
+            elif anz_turns == MAX_TURNS - 1:
+                draw_status(tie=True)
+                game_over = True
+
+            print_board(board)
+            draw_board(board)
+
+            pygame.display.update()
+
+            turn += 1
+            turn = turn % 2
+            anz_turns += 1
+
 board = create_board()
 print_board(board)
 
@@ -154,58 +207,7 @@ while not game_over:
 
     for event in pygame.event.get():
 
-        # Programm Exit
-        if event.type == pygame.QUIT:
-            sys.exit()
-
-        number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
-        if event.type == pygame.KEYDOWN and event.key in number_keys:
-
-            if event.key == pygame.K_1:
-                col = int(0)
-            elif event.key == pygame.K_2:
-                col = int(1)
-            elif event.key == pygame.K_3:
-                col = int(2)
-            elif event.key == pygame.K_4:
-                col = int(3)
-            elif event.key == pygame.K_5:
-                col = int(4)
-            elif event.key == pygame.K_6:
-                col = int(5)
-            elif event.key == pygame.K_7:
-                col = int(6)
-
-            # Ask Player 1 Input
-            if turn == 0:
-                win_message = "Pink gewinnt!"
-                player_color = PINK
-                player_number = 1
-            else:
-                win_message = "Weiß gewinnt!"
-                player_color = WHITE
-                player_number = 2
-
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, player_number)
-
-                if winning_move(board, player_number):
-                    draw_status(wins=True)
-                    wins[player_number] += 1
-                    game_over = True
-                elif anz_turns == MAX_TURNS - 1:
-                    draw_status(tie=True)
-                    game_over = True
-
-                print_board(board)
-                draw_board(board)
-
-                pygame.display.update()
-
-                turn += 1
-                turn = turn % 2
-                anz_turns += 1
-
-            if game_over:
-                pygame.time.wait(3000)
+        game_loop(event)
+        
+        if game_over:
+            pygame.time.wait(3000)
