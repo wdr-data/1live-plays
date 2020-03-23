@@ -15,7 +15,7 @@ SQUARESIZE = 50
 HALF_SQUARE = int(SQUARESIZE / 2)
 RADIUS = int(HALF_SQUARE - 5)
 
-BOARD_OFFSET_X = 4.5
+BOARD_text_center_x = 4.5
 BOARD_OFFSET_Y = 3
 
 wins = {
@@ -34,7 +34,7 @@ size = (width, height)
 
 pygame.init()
 
-myfont = pygame.font.SysFont("monospace", int((SQUARESIZE/4)*3))
+status_font = pygame.font.SysFont("monospace", int((SQUARESIZE / 4) * 3))
 
 def create_board():
     board = np.zeros((ROW_COUNT,COLUMN_COUNT))
@@ -86,7 +86,7 @@ def draw_board(board):
     for c in range(COLUMN_COUNT):
         for r in range(ROW_COUNT):
 
-            xpos = int(c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
+            xpos = int(c * SQUARESIZE + BOARD_text_center_x * SQUARESIZE)
             ypos = int(r * SQUARESIZE + BOARD_OFFSET_Y * SQUARESIZE)
 
             pygame.draw.rect(screen, GREY, (xpos, ypos, SQUARESIZE, SQUARESIZE))
@@ -102,38 +102,54 @@ def draw_board(board):
 
 def draw_column_labels():
     for c in range(COLUMN_COUNT):
-        col_number = myfont.render(str(c+1), 1, GREY)
+        col_number = status_font.render(str(c+1), 1, GREY)
 
-        xpos = int(SQUARESIZE * 0.28 + c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
+        xpos = int(SQUARESIZE * 0.28 + c * SQUARESIZE + BOARD_text_center_x * SQUARESIZE)
         ypos = int(BOARD_OFFSET_Y * SQUARESIZE - 0.8 * SQUARESIZE)
 
         screen.blit(col_number, (xpos,ypos))
 
-def draw_status(wins=False, tie=False):
+def draw_game_end(tie=False):
     if tie:
         color = GREY
         text = "Unentschieden!"
     elif turn == 0:
         color = PINK
-        if wins:
-            text = "Pink gewinnt!"
-        else:
-            text = "Pink ist dran"
-
+        text = "Pink gewinnt!"
     else:
         color = WHITE
-        if wins:
-            text = "Weiß gewinnt!"
-        else:
-            text = "Weiß ist dran"
+        text = "Weiß gewinnt!"
 
-    xpos = BOARD_OFFSET_X * SQUARESIZE
+
+    xpos = BOARD_text_center_x * SQUARESIZE
     ypos = SQUARESIZE
     width = COLUMN_COUNT * SQUARESIZE
     height = SQUARESIZE
 
     pygame.draw.rect(screen, BLACK, (xpos, ypos, width, height))
-    drawn_text = myfont.render(text, 1, color)
+    drawn_text = status_font.render(text, 1, color)
+    text_rect = drawn_text.get_rect(center=(int(xpos + width / 2), ypos + int(height / 2)))
+    screen.blit(drawn_text, text_rect)
+
+def draw_current_player():
+    
+    pygame.draw.rect(screen, BLACK, (xpos, ypos, width, height))
+    
+    if turn == 0:
+        color = PINK
+        text = "Pink ist dran"
+        text_center_x = 2.25
+    else:
+        color = WHITE
+        text = "Weiß ist dran"
+        text_center_x = 13.75
+
+    xpos = text_center_x * SQUARESIZE
+    ypos = SQUARESIZE
+    width = 4 * SQUARESIZE
+    height = SQUARESIZE
+
+    drawn_text = status_font.render(text, 1, color)
     text_rect = drawn_text.get_rect(center=(int(xpos + width / 2), ypos + int(height / 2)))
     screen.blit(drawn_text, text_rect)
 
@@ -174,11 +190,11 @@ def game_loop(event):
             drop_piece(board, row, col, player_number)
 
             if winning_move(board, player_number):
-                draw_status(wins=True)
+                draw_game_end()
                 wins[player_number] += 1
                 game_over = True
             elif turn_count == MAX_TURNS - 1:
-                draw_status(tie=True)
+                draw_game_end(tie=True)
                 game_over = True
 
             print_board(board)
@@ -209,7 +225,7 @@ while True:
 
     while not game_over:
 
-        draw_status()
+        draw_game_end()
 
         pygame.display.update()
 
