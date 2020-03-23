@@ -20,8 +20,10 @@ RADIUS = int(HALF_SQUARE - 5)
 BOARD_OFFSET_X = 4.5
 BOARD_OFFSET_Y = 3
 
-wins_pink = 0
-wins_white = 0
+wins = {
+    1: 0,
+    2: 0,
+}
 game_over = False
 turn = 0
 anz_turns = 0
@@ -89,7 +91,7 @@ def draw_board(board):
             ypos = int(r * SQUARESIZE + BOARD_OFFSET_Y * SQUARESIZE)
 
             pygame.draw.rect(screen, GREY, (xpos, ypos, SQUARESIZE, SQUARESIZE))
-            
+
             if flipped_board[r][c] == 1:
                 pygame.draw.circle(screen, PINK, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
 
@@ -102,21 +104,27 @@ def draw_board(board):
 def draw_column_labels():
     for c in range(COLUMN_COUNT):
         col_number = myfont.render(str(c+1), 1, GREY)
-        
+
         xpos = int(SQUARESIZE * 0.28 + c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
         ypos = int(BOARD_OFFSET_Y * SQUARESIZE - 0.8 * SQUARESIZE)
-        
+
         screen.blit(col_number, (xpos,ypos))
 
-def draw_player():
+def draw_player(wins=False):
 
     if turn == 0:
         color = PINK
-        text = "Pink ist dran"
+        if wins:
+            text = "Pink gewinnt!"
+        else:
+            text = "Pink ist dran"
 
     else:
         color = WHITE
-        text = "Weiß ist dran"
+        if wins:
+            text = "Weiß gewinnt!"
+        else:
+            text = "Weiß ist dran"
 
     xpos = BOARD_OFFSET_X * SQUARESIZE
     ypos = SQUARESIZE
@@ -145,82 +153,50 @@ while anz_turns < MAX_TURNS and not game_over:
         if event.type == pygame.QUIT:
             sys.exit()
 
-        if event.type == pygame.KEYDOWN:
+        number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
+        if event.type == pygame.KEYDOWN and event.key in number_keys:
+
+            if event.key == pygame.K_1:
+                col = int(0)
+            elif event.key == pygame.K_2:
+                col = int(1)
+            elif event.key == pygame.K_3:
+                col = int(2)
+            elif event.key == pygame.K_4:
+                col = int(3)
+            elif event.key == pygame.K_5:
+                col = int(4)
+            elif event.key == pygame.K_6:
+                col = int(5)
+            elif event.key == pygame.K_7:
+                col = int(6)
 
             # Ask Player 1 Input
             if turn == 0:
-
-                if event.key == pygame.K_1:
-                    col = int(0)
-                elif event.key == pygame.K_2:
-                    col = int(1)
-                elif event.key == pygame.K_3:
-                    col = int(2)
-                elif event.key == pygame.K_4:
-                    col = int(3)
-                elif event.key == pygame.K_5:
-                    col = int(4)
-                elif event.key == pygame.K_6:
-                    col = int(5)
-                elif event.key == pygame.K_7:
-                    col = int(6)
-
-                if is_valid_location(board, col):
-                    row = get_next_open_row(board, col)
-                    drop_piece(board, row, col, 1)
-
-                    if anz_turns == MAX_TURNS-1:
-                        label = myfont.render("Unentschieden!", 1, GREY)
-                        screen.blit(label, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
-
-                    if winning_move(board, 1):
-                        pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-                        label = myfont.render("Pink gewinnt!", 1, PINK)
-                        wins_pink += 1
-                        screen.blit(label, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
-                        game_over = True
-
-                else:
-                    turn -= 1
-                    anz_turns -= 1
-
-            # Ask Player 2 Input
+                win_message = "Pink gewinnt!"
+                player_color = PINK
+                player_number = 1
             else:
+                win_message = "Weiß gewinnt!"
+                player_color = WHITE
+                player_number = 2
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
-                        col = int(0)
-                    elif event.key == pygame.K_2:
-                        col = int(1)
-                    elif event.key == pygame.K_3:
-                        col = int(2)
-                    elif event.key == pygame.K_4:
-                        col = int(3)
-                    elif event.key == pygame.K_5:
-                        col = int(4)
-                    elif event.key == pygame.K_6:
-                        col = int(5)
-                    elif event.key == pygame.K_7:
-                        col = int(6)
+            if is_valid_location(board, col):
+                row = get_next_open_row(board, col)
+                drop_piece(board, row, col, player_number)
 
-                if is_valid_location(board, col):
-                    row = get_next_open_row(board, col)
-                    drop_piece(board, row, col, 2)
+                if anz_turns == MAX_TURNS - 1:
+                    label = myfont.render("Unentschieden!", 1, GREY)
+                    screen.blit(label, (int(SQUARESIZE * 0.4),int(SQUARESIZE * 0.1)))
 
-                    if anz_turns == MAX_TURNS-1:
-                        label = myfont.render("Unentschieden!", 1, GREY)
-                        screen.blit(label, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
+                if winning_move(board, player_number):
+                    draw_player(wins=True)
+                    wins[player_number] += 1
+                    game_over = True
 
-                    if winning_move(board, 2):
-                        pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-                        label = myfont.render("Weiß gewinnt!", 1, WHITE)
-                        wins_white += 1
-                        screen.blit(label, (int(SQUARESIZE*0.4),int(SQUARESIZE*0.1)))
-                        game_over = True
-
-                else:
-                    turn -= 1
-                    anz_turns -= 1
+            else:
+                turn -= 1
+                anz_turns -= 1
 
             print_board(board)
             draw_board(board)
