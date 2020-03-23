@@ -3,8 +3,6 @@ import pygame
 import sys
 import math
 
-# hallo
-
 GREY = (137,149,155)
 BLACK = (0,0,0)
 PINK = (255,0,153)
@@ -24,9 +22,10 @@ wins = {
     1: 0,
     2: 0,
 }
+
 game_over = False
 turn = 0
-anz_turns = 0
+turn_count = 0
 
 width = 16 * SQUARESIZE
 height = 9 * SQUARESIZE
@@ -140,7 +139,7 @@ def draw_status(wins=False, tie=False):
 
 def game_loop(event):
     
-    global turn, anz_turns, game_over
+    global turn, turn_count, game_over
 
     # Programm Exit
     if event.type == pygame.QUIT:
@@ -178,7 +177,7 @@ def game_loop(event):
                 draw_status(wins=True)
                 wins[player_number] += 1
                 game_over = True
-            elif anz_turns == MAX_TURNS - 1:
+            elif turn_count == MAX_TURNS - 1:
                 draw_status(tie=True)
                 game_over = True
 
@@ -189,25 +188,34 @@ def game_loop(event):
 
             turn += 1
             turn = turn % 2
-            anz_turns += 1
-
-board = create_board()
-print_board(board)
+            turn_count += 1
 
 screen = pygame.display.set_mode(size)
-draw_board(board)
-draw_column_labels()
-pygame.display.update()
 
-while not game_over:
+pink_first = False
 
-    draw_status()
+while True:
+    board = create_board()
+    print_board(board)
 
+    draw_board(board)
+    draw_column_labels()
     pygame.display.update()
 
-    for event in pygame.event.get():
+    pink_first = not pink_first
+    game_over = False
+    turn = 0 if pink_first else 1
+    turn_count = 0
 
-        game_loop(event)
-        
-        if game_over:
-            pygame.time.wait(3000)
+    while not game_over:
+
+        draw_status()
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+
+            game_loop(event)
+            
+            if game_over:
+                pygame.time.wait(3000)
