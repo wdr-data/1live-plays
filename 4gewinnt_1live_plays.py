@@ -110,9 +110,11 @@ def draw_column_labels():
 
         screen.blit(col_number, (xpos,ypos))
 
-def draw_player(wins=False):
-
-    if turn == 0:
+def draw_status(wins=False, tie=False):
+    if tie:
+        color = GREY
+        text = "Unentschieden!"
+    elif turn == 0:
         color = PINK
         if wins:
             text = "Pink gewinnt!"
@@ -128,10 +130,13 @@ def draw_player(wins=False):
 
     xpos = BOARD_OFFSET_X * SQUARESIZE
     ypos = SQUARESIZE
+    width = COLUMN_COUNT * SQUARESIZE
+    height = SQUARESIZE
 
-    pygame.draw.rect(screen, BLACK, (xpos, ypos, 7 * SQUARESIZE, SQUARESIZE))
-    dran = myfont.render(text, 1, color)
-    screen.blit(dran, (int(xpos + SQUARESIZE * 0.4), int(ypos + SQUARESIZE * 0.1)))
+    pygame.draw.rect(screen, BLACK, (xpos, ypos, width, height))
+    drawn_text = myfont.render(text, 1, color)
+    text_rect = drawn_text.get_rect(center=(int(xpos + width / 2), ypos + int(height / 2)))
+    screen.blit(drawn_text, text_rect)
 
 board = create_board()
 print_board(board)
@@ -141,9 +146,9 @@ draw_board(board)
 draw_column_labels()
 pygame.display.update()
 
-while anz_turns < MAX_TURNS and not game_over:
+while not game_over:
 
-    draw_player()
+    draw_status()
 
     pygame.display.update()
 
@@ -185,30 +190,22 @@ while anz_turns < MAX_TURNS and not game_over:
                 row = get_next_open_row(board, col)
                 drop_piece(board, row, col, player_number)
 
-                if anz_turns == MAX_TURNS - 1:
-                    label = myfont.render("Unentschieden!", 1, GREY)
-                    screen.blit(label, (int(SQUARESIZE * 0.4),int(SQUARESIZE * 0.1)))
-
                 if winning_move(board, player_number):
-                    draw_player(wins=True)
+                    draw_status(wins=True)
                     wins[player_number] += 1
                     game_over = True
+                elif anz_turns == MAX_TURNS - 1:
+                    draw_status(tie=True)
+                    game_over = True
 
-            else:
-                turn -= 1
-                anz_turns -= 1
+                print_board(board)
+                draw_board(board)
 
-            print_board(board)
-            draw_board(board)
+                pygame.display.update()
 
-            pygame.display.update()
-
-            turn += 1
-            turn = turn % 2
-            anz_turns += 1
-
-            if anz_turns == MAX_TURNS:
-                pygame.time.wait(3000)
+                turn += 1
+                turn = turn % 2
+                anz_turns += 1
 
             if game_over:
                 pygame.time.wait(3000)
