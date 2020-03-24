@@ -8,7 +8,7 @@ import numpy as np
 import game_logic as game
 from square_rect import SquareRect
 
-SQUARESIZE = 100
+SQUARESIZE = 50
 HALF_SQUARE = int(SQUARESIZE / 2)
 RADIUS = int(HALF_SQUARE - 5)
 
@@ -151,8 +151,6 @@ def draw_current_player(turn):
 def draw_scoreboard(score):
     colon_rect = SquareRect(7.85, 0, .3, 1)
     draw_text(':', GREY, hack_font, colon_rect)
-
-    white_text = f'{score[2]} WEIß'
 
     pink_number_rect = SquareRect(0, 0, colon_rect.left, 1)
     pink_number_text_rect = draw_text(str(score[1]), PINK, hack_font, pink_number_rect, align=Align.RIGHT)
