@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 import numpy as np
 
 import game_logic as game
@@ -54,13 +55,16 @@ def draw_board():
             pygame.draw.rect(screen, GREY, (xpos, ypos, SQUARESIZE, SQUARESIZE))
 
             if flipped_board[r][c] == 1:
-                pygame.draw.circle(screen, PINK, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
+                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, PINK)
+                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, PINK)
 
             elif flipped_board[r][c] == 2:
-                pygame.draw.circle(screen, WHITE, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
+                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, WHITE)
+                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, WHITE)
 
             else:
-                pygame.draw.circle(screen, BLACK, (xpos + HALF_SQUARE, ypos + HALF_SQUARE), RADIUS)
+                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
+                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
 
 def draw_column_labels():
     for c in range(game.COLUMN_COUNT):
