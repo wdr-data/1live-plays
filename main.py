@@ -9,7 +9,8 @@ import game_logic as game
 import ui
 
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
-wins = {
+
+score = {
     1: 0,
     2: 0,
 }
@@ -55,8 +56,9 @@ def game_loop(event):
             game.drop_piece(row, col, player_number)
 
             if game.winning_move(player_number):
+                score[player_number] += 1
                 ui.draw_game_end(turn)
-                wins[player_number] += 1
+                ui.draw_scoreboard(score)
                 game_over = True
             elif turn_count == MAX_TURNS - 1:
                 ui.draw_game_end(turn, tie=True)
@@ -71,8 +73,13 @@ def game_loop(event):
             turn = turn % 2
             turn_count += 1
 
+        if game_over:
+            pygame.time.wait(3000)
+            ui.draw_erase(ui.Positions.GAME_END)
+
 
 pink_first = False
+ui.draw_scoreboard(score)
 
 while True:
     game.create_board()
@@ -96,7 +103,4 @@ while True:
         for event in pygame.event.get():
 
             game_loop(event)
-
-            if game_over:
-                pygame.time.wait(3000)
-                ui.draw_erase(ui.Positions.GAME_END)
+            break

@@ -1,11 +1,14 @@
+from enum import Enum
+
 import pygame
 import pygame.gfxdraw
+import pygame.ftfont
 import numpy as np
 
 import game_logic as game
 from square_rect import SquareRect
 
-SQUARESIZE = 50
+SQUARESIZE = 100
 HALF_SQUARE = int(SQUARESIZE / 2)
 RADIUS = int(HALF_SQUARE - 5)
 
@@ -22,9 +25,14 @@ screen_height = 9 * SQUARESIZE
 
 size = (screen_width, screen_height)
 
-number_font = pygame.font.SysFont("Arial", int((SQUARESIZE / 4) * 3))
-status_font = pygame.font.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
-status_font_large = pygame.font.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
+pygame.ftfont.init()
+number_font = pygame.ftfont.SysFont("Arial", int((SQUARESIZE / 4) * 3))
+
+score_font = pygame.ftfont.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
+hack_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
+
+status_font = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
+status_font_large = pygame.ftfont.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
 
 screen = pygame.display.set_mode(size)
 
@@ -34,17 +42,37 @@ class Positions:
     GAME_END = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
     CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 3.5, 2)
 
+class Align(Enum):
+    CENTER = 'center'
+    LEFT = 'left'
+    RIGHT = 'right'
+
+
 def draw_erase(square_rect):
     rect = square_rect.get_rect(SQUARESIZE)
     pygame.draw.rect(screen, BLACK, rect)
 
-def draw_text(text, color, font, square_rect):
+def draw_text(text, color, font, square_rect, align=Align.CENTER):
     rect = square_rect.get_rect(SQUARESIZE)
     draw_erase(square_rect)
 
     drawn_text = font.render(text, 1, color)
+
     text_rect = drawn_text.get_rect(center=(rect.left + int(rect.width / 2), rect.top + int(rect.height / 2)))
+
+    if align is Align.LEFT:
+        text_rect.left = rect.left
+    if align is Align.RIGHT:
+        text_rect.right = rect.right
+
     screen.blit(drawn_text, text_rect)
+
+    return SquareRect(
+        text_rect.left / SQUARESIZE,
+        text_rect.top / SQUARESIZE,
+        text_rect.width / SQUARESIZE,
+        text_rect.height / SQUARESIZE,
+    )
 
 def draw_board():
     flipped_board = np.flip(game.board, 0)
@@ -119,3 +147,21 @@ def draw_current_player(turn):
     square_rect_erase.top += 1.5
     draw_erase(square_rect_erase)
     draw_text('ist dran', color, status_font, square_rect_text)
+
+def draw_scoreboard(score):
+    colon_rect = SquareRect(7.85, 0, .3, 1)
+    draw_text(':', GREY, hack_font, colon_rect)
+
+    white_text = f'{score[2]} WEIß'
+
+    pink_number_rect = SquareRect(0, 0, colon_rect.left, 1)
+    pink_number_text_rect = draw_text(str(score[1]), PINK, hack_font, pink_number_rect, align=Align.RIGHT)
+    pink_rect = SquareRect(0, 0, pink_number_text_rect.left, 1)
+    draw_text('PINK ', PINK, score_font, pink_rect, align=Align.RIGHT)
+
+    white_number_rect = SquareRect(colon_rect.right + .02, 0, 16, 1)
+    white_number_text_rect = draw_text(str(score[2]), WHITE, hack_font, white_number_rect, align=Align.LEFT)
+    white_rect = SquareRect(white_number_text_rect.right, 0, 16, 1)
+    draw_text(' WEIß', WHITE, score_font, white_rect, align=Align.LEFT)
+
+    draw_erase(SquareRect(0, 0.75, 16, .1))
