@@ -70,12 +70,13 @@ def draw_board():
 
 def draw_column_labels():
     for c in range(game.COLUMN_COUNT):
-        col_number = number_font.render(str(c+1), 1, GREY)
-
-        xpos = int(SQUARESIZE * 0.28 + c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
-        ypos = int(BOARD_OFFSET_Y * SQUARESIZE - 0.8 * SQUARESIZE)
-
-        screen.blit(col_number, (xpos,ypos))
+        square_rect = SquareRect(
+            BOARD_OFFSET_X + c,
+            BOARD_OFFSET_Y - 0.8,
+            1,
+            0.8,
+        )
+        draw_text(str(c + 1), GREY, number_font, square_rect)
 
 def draw_game_end(turn, tie=False):
     if tie:
