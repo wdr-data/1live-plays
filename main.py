@@ -99,8 +99,12 @@ if DEBUG:
     queue = pygame.event
 else:
     print('Loading config...')
-    with open('config.json', 'r') as fp:
-        config = json.load(fp)
+    try:
+        with open('config.json', 'r') as fp:
+            config = json.load(fp)
+    except FileNotFoundError:
+        print('Config file "config.json" not found.')
+        sys.exit(1)
 
     print('Connecting bots...')
     queue = Queue()
@@ -108,7 +112,9 @@ else:
     for bot_name, bot_config in config.items():
         video_id = input(f'Please enter video ID for bot "{bot_name}": ')
         bots[bot_name] = Bot(bot_name, bot_config, video_id, queue)
-        bots[bot_name].start_polling()
+
+    for bot in bots.values():
+        bot.start_polling()
 
 while True:
     game.create_board()
