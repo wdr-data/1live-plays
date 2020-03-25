@@ -144,15 +144,25 @@ def mode_first_come_first_serve():
             break
 
 def mode_democracy():
+    global turn, democracies, no_votes
+
     valid_locations = game.get_valid_locations()
     democracy = democracies[turn]
     democracy.reset_votes()
-    sleep(DEMOCRACY_TIMEOUT)
+
+    for time_left in range(DEMOCRACY_TIMEOUT, -1, -1):
+        ui.draw_countdown(turn, time_left, no_votes and time_left + 1 >= DEMOCRACY_TIMEOUT)
+        pygame.display.update()
+        if time_left:
+            sleep(1)
+
     column = democracy.get_vote_and_reset(valid_locations)
 
     if column is None:
+        no_votes = True
         return
 
+    no_votes = False
     event = Event(democracy.bot, column)
     game_loop(event)
 
@@ -167,6 +177,7 @@ while True:
     game_over = False
     turn = 'pink' if pink_first else 'white'
     turn_count = 0
+    no_votes = False
 
     while not game_over:
 

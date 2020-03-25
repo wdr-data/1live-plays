@@ -30,6 +30,7 @@ number_font = pygame.ftfont.SysFont("Arial", int((SQUARESIZE / 4) * 3))
 
 score_font = pygame.ftfont.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
 hack_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
+countdown_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5))
 
 status_font = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
 status_font_large = pygame.ftfont.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
@@ -41,6 +42,7 @@ class Positions:
     CURRENT_PLAYER_WHITE_LEFT = 12
     GAME_END = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
     CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 3.5, 2)
+    COUNTDOWN = SquareRect(0, 5.5, 3.5, 2)
 
 class Align(Enum):
     CENTER = 'center'
@@ -48,9 +50,9 @@ class Align(Enum):
     RIGHT = 'right'
 
 
-def draw_erase(square_rect):
+def draw_erase(square_rect, color=BLACK):
     rect = square_rect.get_rect(SQUARESIZE)
-    pygame.draw.rect(screen, BLACK, rect)
+    pygame.draw.rect(screen, color, rect)
 
 def draw_text(text, color, font, square_rect, align=Align.CENTER):
     rect = square_rect.get_rect(SQUARESIZE)
@@ -147,6 +149,38 @@ def draw_current_player(turn):
     square_rect_erase.top += 1.5
     draw_erase(square_rect_erase)
     draw_text('ist dran', color, status_font, square_rect_text)
+
+def draw_countdown(turn, time_left, no_votes_message):
+
+    if turn == 'pink':
+        color = PINK
+        text_left = Positions.CURRENT_PLAYER_PINK_LEFT
+        erase_left = Positions.CURRENT_PLAYER_WHITE_LEFT
+    else:
+        color = WHITE
+        text_left = Positions.CURRENT_PLAYER_WHITE_LEFT
+        erase_left = Positions.CURRENT_PLAYER_PINK_LEFT
+
+    square_rect_text = Positions.COUNTDOWN.copy()
+    square_rect_text.left = text_left
+
+    square_rect_erase = Positions.COUNTDOWN.copy()
+    square_rect_erase.left = erase_left
+
+    draw_erase(square_rect_erase)
+    square_rect_countdown = draw_text(str(time_left), color, countdown_font, square_rect_text)
+    square_rect_countdown.top = square_rect_countdown.bottom - .15
+    square_rect_countdown.height = .1
+    draw_erase(square_rect_countdown)
+
+    square_rect_text.top = square_rect_text.bottom
+    square_rect_text.height = 1
+    square_rect_text.left -= .5
+    square_rect_text.width += 1
+    draw_erase(square_rect_text, color=BLACK)
+
+    if no_votes_message:
+        draw_text('Keine Votes!', color, status_font, square_rect_text)
 
 def draw_scoreboard(score):
     colon_rect = SquareRect(7.85, 0, .3, 1)

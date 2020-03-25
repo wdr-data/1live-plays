@@ -15,6 +15,14 @@ class SquareRect():
 
     right = property(get_right, set_right)
 
+    def get_bottom(self):
+        return self.top + self.height
+
+    def set_bottom(self, value):
+        self.top = value - self.heigh
+
+    bottom = property(get_bottom, set_bottom)
+
     def get_rect(self, squaresize):
         return Rect(
             int(self.left * squaresize),
