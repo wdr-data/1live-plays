@@ -121,12 +121,7 @@ else:
         queue = Queue()
         bots = {}
         for bot_name, bot_config in config.items():
-            if 'video_id' in bot_config:
-                video_id = bot_config['video_id']
-            else:
-                video_id = input(f'Please enter video ID for bot "{bot_name}": ')
-
-            bots[bot_name] = Bot(bot_name, bot_config, video_id, queue)
+            bots[bot_name] = Bot(bot_name, bot_config, queue)
 
         for bot in bots.values():
             bot.start_polling()
@@ -135,12 +130,7 @@ else:
 
         democracies = {}
         for bot_name, bot_config in config.items():
-            if 'video_id' in bot_config:
-                video_id = bot_config['video_id']
-            else:
-                video_id = input(f'Please enter video ID for bot "{bot_name}": ')
-
-            bot = Bot(bot_name, bot_config, video_id)
+            bot = Bot(bot_name, bot_config)
             democracies[bot_name] = DemocracyMode(bot)
 
         for democracy in democracies.values():

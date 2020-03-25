@@ -56,10 +56,10 @@ class DemocracyMode():
 
 
 class Bot():
-    def __init__(self, name, config, video_id, queue=None):
+    def __init__(self, name, config, queue=None):
         self.name = name
         self.youtube = build('youtube', 'v3', developerKey=config['api_key'])
-        self.video_id = video_id
+        self.video_id = config['video_id']
         self.queue = queue
 
     def start_polling(self):
