@@ -2,6 +2,8 @@ import math
 import sys
 import os
 import json
+from time import time, sleep
+from enum import Enum
 from queue import Queue
 
 import pygame
@@ -10,9 +12,16 @@ pygame.init()
 
 import game_logic as game
 import ui
-from bot import Bot, Event
+from bot import Bot, Event, DemocracyMode
 
-DEBUG = os.environ.get('DEBUG', False)
+class GameModes(Enum):
+    DEMOCRACY = 'democracy'
+    FIRST_COME_FIRST_SERVE = 'first_come_first_serve'
+
+DEBUG = False
+MODE = GameModes.FIRST_COME_FIRST_SERVE
+DEMOCRACY_TIMEOUT = 15
+
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
 
 score = {
@@ -79,7 +88,6 @@ def game_loop(event):
             ui.draw_game_end(turn, tie=True)
             game_over = True
 
-        game.print_board()
         ui.draw_board()
 
         pygame.display.update()
@@ -106,19 +114,59 @@ else:
         print('Config file "config.json" not found.')
         sys.exit(1)
 
-    print('Connecting bots...')
-    queue = Queue()
-    bots = {}
-    for bot_name, bot_config in config.items():
-        video_id = input(f'Please enter video ID for bot "{bot_name}": ')
-        bots[bot_name] = Bot(bot_name, bot_config, video_id, queue)
+    print(f'Starting gamemode "{MODE.value}"...')
 
-    for bot in bots.values():
-        bot.start_polling()
+    if MODE is GameModes.FIRST_COME_FIRST_SERVE:
+        print('Connecting bots...')
+        queue = Queue()
+        bots = {}
+        for bot_name, bot_config in config.items():
+            if 'video_id' in bot_config:
+                video_id = bot_config['video_id']
+            else:
+                video_id = input(f'Please enter video ID for bot "{bot_name}": ')
+
+            bots[bot_name] = Bot(bot_name, bot_config, video_id, queue)
+
+        for bot in bots.values():
+            bot.start_polling()
+    elif MODE is GameModes.DEMOCRACY:
+        print('Connecting bots...')
+
+        democracies = {}
+        for bot_name, bot_config in config.items():
+            if 'video_id' in bot_config:
+                video_id = bot_config['video_id']
+            else:
+                video_id = input(f'Please enter video ID for bot "{bot_name}": ')
+
+            bot = Bot(bot_name, bot_config, video_id)
+            democracies[bot_name] = DemocracyMode(bot)
+
+        for democracy in democracies.values():
+            democracy.start()
+
+def mode_first_come_first_serve():
+    global queue
+    for event in queue.get():
+        game_loop(event)
+        if game_over:
+            break
+
+def mode_democracy():
+    democracy = democracies[turn]
+    democracy.reset_votes()
+    sleep(DEMOCRACY_TIMEOUT)
+    column = democracy.get_vote_and_reset()
+
+    if column is None:
+        return
+
+    event = Event(democracy.bot, column)
+    game_loop(event)
 
 while True:
     game.create_board()
-    game.print_board()
 
     ui.draw_board()
     ui.draw_column_labels()
@@ -135,7 +183,7 @@ while True:
 
         pygame.display.update()
 
-        for event in queue.get():
-            game_loop(event)
-            if game_over:
-                break
+        if MODE is GameModes.FIRST_COME_FIRST_SERVE:
+            mode_first_come_first_serve()
+        elif MODE is GameModes.DEMOCRACY:
+            mode_democracy()

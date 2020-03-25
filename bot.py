@@ -1,5 +1,7 @@
 from time import sleep
-from threading import Thread
+from threading import Thread, RLock
+from queue import Queue
+from collections import defaultdict
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -11,8 +13,50 @@ class Event():
         self.bot = bot
         self.column = column
 
+class DemocracyMode():
+    def __init__(self, bot):
+        self.bot = bot
+        self.queue_in = Queue()
+
+        self.votes_lock = RLock()
+        self.reset_votes()
+
+    def reset_votes(self):
+        with self.votes_lock:
+            self.votes = defaultdict(int)
+
+    def get_vote_and_reset(self):
+        with self.votes_lock:
+            if len(self.votes) == 0:
+                print(f'No votes from "{self.bot.name}" yet!')
+                vote = None
+            elif len(self.votes) == 1:
+                vote = list(self.votes.keys())[0]
+            else:
+                vote = max(*self.votes, key=lambda column: self.votes[column])
+
+            self.reset_votes()
+            return vote
+
+    def start(self):
+        self.bot.queue = self.queue_in
+        self.bot.start_polling()
+        thread = Thread(target=self.run, args=())
+        thread.daemon = True
+        print(f'Starting democracy thread for bot "{self.bot.name}"...')
+        thread.start()
+
+    def run(self):
+        while True:
+            batch = self.queue_in.get()
+            with self.votes_lock:
+                for event in batch:
+                    print(f'"{self.bot.name}" voting for {event.column}')
+                    self.votes[event.column] += 1
+
+
 class Bot():
-    def __init__(self, name, config, video_id, queue):
+    def __init__(self, name, config, video_id, queue=None):
         self.name = name
         self.youtube = build('youtube', 'v3', developerKey=config['api_key'])
         self.video_id = video_id
@@ -21,6 +65,7 @@ class Bot():
     def start_polling(self):
         thread = Thread(target=self.run, args=())
         thread.daemon = True
+        print(f'Starting polling thread for bot "{self.name}"...')
         thread.start()
 
     def run(self):

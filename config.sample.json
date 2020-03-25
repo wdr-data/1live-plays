@@ -1,10 +1,12 @@
 {
     "pink": {
         "comment": "1LIVE",
-        "api_key": ""
+        "api_key": "",
+        "video_id": ""
     },
     "white": {
         "comment": "1LIVE Comedy",
-        "api_key": ""
+        "api_key": "",
+        "video_id": ""
     }
 }
