@@ -25,7 +25,7 @@ class DemocracyMode():
         with self.votes_lock:
             self.votes = defaultdict(int)
 
-    def get_vote_and_reset(self, valid_locations):
+    def get_vote(self, valid_locations, reset=False):
         with self.votes_lock:
             filtered_votes = {
                 key: value
@@ -40,7 +40,9 @@ class DemocracyMode():
             else:
                 vote = max(*filtered_votes, key=lambda column: filtered_votes[column])
 
-            self.reset_votes()
+            if reset:
+                self.reset_votes()
+
             return vote
 
     def start(self):

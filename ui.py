@@ -41,6 +41,7 @@ class Positions:
     CURRENT_PLAYER_PINK_LEFT = .5
     CURRENT_PLAYER_WHITE_LEFT = 12
     GAME_END = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
+    CURRENT_VOTE = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
     CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 3.5, 2)
     COUNTDOWN = SquareRect(0, 5.5, 3.5, 2)
 
@@ -97,6 +98,19 @@ def draw_board():
             else:
                 pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
                 pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
+
+def draw_current_vote(vote, turn):
+    if turn == 'pink':
+        color = PINK
+    else:
+        color = WHITE
+
+    left = int((BOARD_OFFSET_X + vote) * SQUARESIZE)
+    top = int(Positions.CURRENT_VOTE.top * SQUARESIZE)
+
+    draw_erase(Positions.CURRENT_VOTE)
+    pygame.gfxdraw.filled_circle(screen, left + HALF_SQUARE, top + HALF_SQUARE, RADIUS, color)
+    pygame.gfxdraw.aacircle(screen, left + HALF_SQUARE, top + HALF_SQUARE, RADIUS, color)
 
 def draw_column_labels():
     for c in range(game.COLUMN_COUNT):

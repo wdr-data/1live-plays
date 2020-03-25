@@ -151,12 +151,17 @@ def mode_democracy():
     democracy.reset_votes()
 
     for time_left in range(DEMOCRACY_TIMEOUT, -1, -1):
+        current_vote = democracy.get_vote(valid_locations)
+
+        if current_vote is not None:
+            ui.draw_current_vote(current_vote, turn)
+
         ui.draw_countdown(turn, time_left, no_votes and time_left + 1 >= DEMOCRACY_TIMEOUT)
         pygame.display.update()
         if time_left:
             sleep(1)
 
-    column = democracy.get_vote_and_reset(valid_locations)
+    column = democracy.get_vote(valid_locations, reset=True)
 
     if column is None:
         no_votes = True
@@ -165,6 +170,7 @@ def mode_democracy():
     no_votes = False
     event = Event(democracy.bot, column)
     game_loop(event)
+    ui.draw_erase(ui.Positions.CURRENT_VOTE)
 
 while True:
     game.create_board()
