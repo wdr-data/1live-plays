@@ -25,15 +25,20 @@ class DemocracyMode():
         with self.votes_lock:
             self.votes = defaultdict(int)
 
-    def get_vote_and_reset(self):
+    def get_vote_and_reset(self, valid_locations):
         with self.votes_lock:
-            if len(self.votes) == 0:
-                print(f'No votes from "{self.bot.name}" yet!')
+            filtered_votes = {
+                key: value
+                for key, value in self.votes.items()
+                if key in valid_locations
+            }
+            if len(filtered_votes) == 0:
+                print(f'No valid votes from "{self.bot.name}" yet!')
                 vote = None
-            elif len(self.votes) == 1:
-                vote = list(self.votes.keys())[0]
+            elif len(filtered_votes) == 1:
+                vote = list(filtered_votes.keys())[0]
             else:
-                vote = max(*self.votes, key=lambda column: self.votes[column])
+                vote = max(*filtered_votes, key=lambda column: filtered_votes[column])
 
             self.reset_votes()
             return vote

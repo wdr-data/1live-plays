@@ -13,6 +13,13 @@ def drop_piece(row, col, piece):
     global board
     board[row][col] = piece
 
+def get_valid_locations():
+    return [
+        col
+        for col in range(COLUMN_COUNT)
+        if is_valid_location(col)
+    ]
+
 def is_valid_location(col):
     global board
     return board[ROW_COUNT-1][col] == 0

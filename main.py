@@ -19,7 +19,7 @@ class GameModes(Enum):
     FIRST_COME_FIRST_SERVE = 'first_come_first_serve'
 
 DEBUG = False
-MODE = GameModes.FIRST_COME_FIRST_SERVE
+MODE = GameModes.DEMOCRACY
 DEMOCRACY_TIMEOUT = 15
 
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
@@ -144,10 +144,11 @@ def mode_first_come_first_serve():
             break
 
 def mode_democracy():
+    valid_locations = game.get_valid_locations()
     democracy = democracies[turn]
     democracy.reset_votes()
     sleep(DEMOCRACY_TIMEOUT)
-    column = democracy.get_vote_and_reset()
+    column = democracy.get_vote_and_reset(valid_locations)
 
     if column is None:
         return
