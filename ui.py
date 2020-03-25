@@ -110,7 +110,7 @@ def draw_game_end(turn, tie=False):
     if tie:
         color = GREY
         text = "Unentschieden!"
-    elif turn == 0:
+    elif turn == 'pink':
         color = PINK
         text = "Pink gewinnt!"
     else:
@@ -121,7 +121,7 @@ def draw_game_end(turn, tie=False):
 
 def draw_current_player(turn):
 
-    if turn == 0:
+    if turn == 'pink':
         color = PINK
         text = "PINK"
         text_left = Positions.CURRENT_PLAYER_PINK_LEFT

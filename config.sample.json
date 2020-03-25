@@ -1,0 +1,10 @@
+{
+    "pink": {
+        "comment": "1LIVE",
+        "api_key": ""
+    },
+    "white": {
+        "comment": "1LIVE Comedy",
+        "api_key": ""
+    }
+}

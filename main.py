@@ -1,5 +1,8 @@
 import math
 import sys
+import os
+import json
+from queue import Queue
 
 import pygame
 
@@ -7,7 +10,9 @@ pygame.init()
 
 import game_logic as game
 import ui
+from bot import Bot, Event
 
+DEBUG = os.environ.get('DEBUG', False)
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
 
 score = {
@@ -16,70 +21,94 @@ score = {
 }
 
 game_over = False
-turn = 0
+turn = 'pink'
 turn_count = 0
 
+def get_current_player_number():
+    global turn
+    return 1 if turn == 'pink' else 2
+
+def switch_turn():
+    global turn
+    turn = 'pink' if turn == 'white' else 'white'
 
 def game_loop(event):
     global turn, turn_count, game_over
 
-    # Programm Exit
-    if event.type == pygame.QUIT:
-        sys.exit()
+    if DEBUG:
+        # Programm Exit
+        number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
+        if event.type == pygame.QUIT:
+            sys.exit()
 
-    number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
-    if event.type == pygame.KEYDOWN and event.key in number_keys:
+        elif event.type == pygame.KEYDOWN and event.key in number_keys:
+            if event.key == pygame.K_1:
+                col = int(0)
+            elif event.key == pygame.K_2:
+                col = int(1)
+            elif event.key == pygame.K_3:
+                col = int(2)
+            elif event.key == pygame.K_4:
+                col = int(3)
+            elif event.key == pygame.K_5:
+                col = int(4)
+            elif event.key == pygame.K_6:
+                col = int(5)
+            elif event.key == pygame.K_7:
+                col = int(6)
 
-        if event.key == pygame.K_1:
-            col = int(0)
-        elif event.key == pygame.K_2:
-            col = int(1)
-        elif event.key == pygame.K_3:
-            col = int(2)
-        elif event.key == pygame.K_4:
-            col = int(3)
-        elif event.key == pygame.K_5:
-            col = int(4)
-        elif event.key == pygame.K_6:
-            col = int(5)
-        elif event.key == pygame.K_7:
-            col = int(6)
-
-        # Ask Player 1 Input
-        if turn == 0:
-            player_number = 1
         else:
-            player_number = 2
+            return
+    else:
+        if event.bot.name != turn:
+            return
+        col = event.column
 
-        if game.is_valid_location(col):
-            row = game.get_next_open_row(col)
-            game.drop_piece(row, col, player_number)
+    player_number = get_current_player_number()
 
-            if game.winning_move(player_number):
-                score[player_number] += 1
-                ui.draw_game_end(turn)
-                ui.draw_scoreboard(score)
-                game_over = True
-            elif turn_count == MAX_TURNS - 1:
-                ui.draw_game_end(turn, tie=True)
-                game_over = True
+    if game.is_valid_location(col):
+        row = game.get_next_open_row(col)
+        game.drop_piece(row, col, player_number)
 
-            game.print_board()
-            ui.draw_board()
+        if game.winning_move(player_number):
+            score[player_number] += 1
+            ui.draw_game_end(turn)
+            ui.draw_scoreboard(score)
+            game_over = True
+        elif turn_count == MAX_TURNS - 1:
+            ui.draw_game_end(turn, tie=True)
+            game_over = True
 
-            pygame.display.update()
+        game.print_board()
+        ui.draw_board()
 
-            turn += 1
-            turn = turn % 2
-            turn_count += 1
+        pygame.display.update()
 
-        if game_over:
-            pygame.time.wait(3000)
-            ui.draw_erase(ui.Positions.GAME_END)
+        switch_turn()
+        turn_count += 1
+
+    if game_over:
+        pygame.time.wait(3000)
+        ui.draw_erase(ui.Positions.GAME_END)
 
 
 pink_first = False
 ui.draw_scoreboard(score)
+
+if DEBUG:
+    queue = pygame.event
+else:
+    print('Loading config...')
+    with open('config.json', 'r') as fp:
+        config = json.load(fp)
+
+    print('Connecting bots...')
+    queue = Queue()
+    bots = {}
+    for bot_name, bot_config in config.items():
+        video_id = input(f'Please enter video ID for bot "{bot_name}": ')
+        bots[bot_name] = Bot(bot_name, bot_config, video_id, queue)
+        bots[bot_name].start_polling()
 
 while True:
     game.create_board()
@@ -91,7 +120,7 @@ while True:
 
     pink_first = not pink_first
     game_over = False
-    turn = 0 if pink_first else 1
+    turn = 'pink' if pink_first else 'white'
     turn_count = 0
 
     while not game_over:
@@ -100,7 +129,7 @@ while True:
 
         pygame.display.update()
 
-        for event in pygame.event.get():
-
+        for event in queue.get():
             game_loop(event)
-            break
+            if game_over:
+                break
