@@ -18,9 +18,12 @@ class GameModes(Enum):
     DEMOCRACY = 'democracy'
     FIRST_COME_FIRST_SERVE = 'first_come_first_serve'
 
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', False)
 MODE = GameModes.DEMOCRACY
 DEMOCRACY_TIMEOUT = 15
+
+if DEBUG:
+    MODE = GameModes.FIRST_COME_FIRST_SERVE
 
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
 

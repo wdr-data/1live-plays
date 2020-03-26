@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 
 import pygame
 import pygame.gfxdraw
@@ -8,7 +9,7 @@ import numpy as np
 import game_logic as game
 from square_rect import SquareRect
 
-SQUARESIZE = 50
+SQUARESIZE = 100
 HALF_SQUARE = int(SQUARESIZE / 2)
 RADIUS = int(HALF_SQUARE - 5)
 
@@ -35,7 +36,10 @@ countdown_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int(SQUARES
 status_font = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
 status_font_large = pygame.ftfont.Font("fonts/WDRSans-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
 
-screen = pygame.display.set_mode(size)
+if os.environ.get('FULLSCREEN'):
+    screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+else:
+    screen = pygame.display.set_mode(size)
 
 class Positions:
     CURRENT_PLAYER_PINK_LEFT = .5
