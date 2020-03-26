@@ -25,12 +25,19 @@ DEMOCRACY_TIMEOUT = 15
 if DEBUG:
     MODE = GameModes.FIRST_COME_FIRST_SERVE
 
+SAVEGAME = 'score.json'
+
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
 
-score = {
-    1: 0,
-    2: 0,
-}
+try:
+    with open(SAVEGAME, 'r') as fp:
+        score = json.load(fp)
+except FileNotFoundError:
+    print('No savegame found.')
+    score = {
+        'pink': 0,
+        'white': 0,
+    }
 
 game_over = False
 turn = 'pink'
@@ -83,7 +90,7 @@ def game_loop(event):
         game.drop_piece(row, col, player_number)
 
         if game.winning_move(player_number):
-            score[player_number] += 1
+            score[turn] += 1
             ui.draw_game_end(turn)
             ui.draw_scoreboard(score)
             game_over = True
@@ -198,3 +205,6 @@ while True:
             mode_first_come_first_serve()
         elif MODE is GameModes.DEMOCRACY:
             mode_democracy()
+
+    with open(SAVEGAME, 'w') as fp:
+        json.dump(score, fp)

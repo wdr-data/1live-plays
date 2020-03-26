@@ -205,12 +205,12 @@ def draw_scoreboard(score):
     draw_text(':', GREY, hack_font, colon_rect)
 
     pink_number_rect = SquareRect(0, 0, colon_rect.left, 1)
-    pink_number_text_rect = draw_text(str(score[1]), PINK, hack_font, pink_number_rect, align=Align.RIGHT)
+    pink_number_text_rect = draw_text(str(score['pink']), PINK, hack_font, pink_number_rect, align=Align.RIGHT)
     pink_rect = SquareRect(0, 0, pink_number_text_rect.left, 1)
     draw_text('PINK ', PINK, score_font, pink_rect, align=Align.RIGHT)
 
     white_number_rect = SquareRect(colon_rect.right + .02, 0, 16, 1)
-    white_number_text_rect = draw_text(str(score[2]), WHITE, hack_font, white_number_rect, align=Align.LEFT)
+    white_number_text_rect = draw_text(str(score['white']), WHITE, hack_font, white_number_rect, align=Align.LEFT)
     white_rect = SquareRect(white_number_text_rect.right, 0, 16, 1)
     draw_text(' WEIß', WHITE, score_font, white_rect, align=Align.LEFT)
 
