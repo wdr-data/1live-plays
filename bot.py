@@ -33,7 +33,8 @@ class DemocracyMode():
                 if key in valid_locations
             }
             if len(filtered_votes) == 0:
-                print(f'No valid votes from "{self.bot.name}" yet!')
+                if reset:
+                    print(f'No valid votes from "{self.bot.name}" yet!')
                 vote = None
             elif len(filtered_votes) == 1:
                 vote = list(filtered_votes.keys())[0]
@@ -112,7 +113,8 @@ class Bot():
             try:
                 response = request.execute()
             except HttpError as e:
-                sleep(response['pollingIntervalMillis'] / 1000)
+                print(f'Polling-Error in bot "{self.name}":', e)
+                sleep(10)
                 continue
 
             page_token = response['nextPageToken']
@@ -129,7 +131,9 @@ class Bot():
                 for item in items
             ]
 
-            sleep(response['pollingIntervalMillis'] / 1000)
+            polling_interval = response['pollingIntervalMillis'] / 1000
+            print(f'Bot "{self.name}" sleeping {round(polling_interval, 2)}s')
+            sleep(polling_interval)
 
 if __name__ == '__main__':
     import json
