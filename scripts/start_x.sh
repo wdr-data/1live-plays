@@ -1,1 +1,1 @@
-Xvfb :20 -ac -screen 0 1600x900x16
+Xvfb :20 -ac -screen 0 1600x900x24
