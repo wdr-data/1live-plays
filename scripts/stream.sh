@@ -2,6 +2,7 @@ ffmpeg \
 -f x11grab \
 -s 1600x900 \
 -framerate 30 \
+-draw_mouse 0 \
 -i :20 \
 -f lavfi -i anullsrc \
 -c:v libx264 \
