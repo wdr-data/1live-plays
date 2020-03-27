@@ -28,14 +28,14 @@ screen_height = 9 * SQUARESIZE
 size = (screen_width, screen_height)
 
 pygame.ftfont.init()
-number_font = pygame.ftfont.SysFont("Arial", int((SQUARESIZE / 4) * 3))
 
-score_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
-hack_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
-countdown_font = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5))
-
-status_font = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
-status_font_large = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
+class Fonts:
+    SCORE = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
+    NUMBERS = SCORE
+    GAME_END = SCORE
+    COUNTDOWN = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5))
+    STATUS = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
+    STATUS_LARGE = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
 
 if os.environ.get('FULLSCREEN'):
     screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
@@ -82,6 +82,14 @@ def draw_text(text, color, font, square_rect, align=Align.CENTER):
         text_rect.height / SQUARESIZE,
     )
 
+def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
+    text_rect = draw_text(text, color, font, square_rect, align=align)
+    erase_rect = text_rect.copy()
+    erase_rect.top = erase_rect.bottom - .1 * text_rect.height
+    erase_rect.height = .05 * text_rect.height
+    draw_erase(erase_rect)
+    return text_rect
+
 def draw_board():
     flipped_board = np.flip(game.board, 0)
 
@@ -122,7 +130,7 @@ def draw_column_labels():
             1,
             0.8,
         )
-        draw_text(str(c + 1), COLOR_BOARD, number_font, square_rect)
+        draw_hack_text(str(c + 1), COLOR_BOARD, Fonts.NUMBERS, square_rect)
 
 def draw_game_end(turn, tie=False):
     if tie:
@@ -132,7 +140,7 @@ def draw_game_end(turn, tie=False):
         color = config['players'][turn]['color']
         text = f"{config['players'][turn]['name']} gewinnt!"
 
-    draw_text(text, color, status_font, Positions.GAME_END)
+    draw_hack_text(text, color, Fonts.GAME_END, Positions.GAME_END)
 
 def draw_current_player(turn):
     color = config['players'][turn]['color']
@@ -152,14 +160,14 @@ def draw_current_player(turn):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_text(text, color, status_font_large, square_rect_text)
+    draw_text(text, color, Fonts.STATUS_LARGE, square_rect_text)
 
     square_rect_text.height = 1
     square_rect_erase.height = 1
     square_rect_text.top += 1.5
     square_rect_erase.top += 1.5
     draw_erase(square_rect_erase)
-    draw_text('ist dran', color, status_font, square_rect_text)
+    draw_text('ist dran', color, Fonts.STATUS, square_rect_text)
 
 def draw_countdown(turn, time_left, no_votes_message):
     color = config['players'][turn]['color']
@@ -178,7 +186,7 @@ def draw_countdown(turn, time_left, no_votes_message):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    square_rect_countdown = draw_text(str(time_left), color, countdown_font, square_rect_text)
+    square_rect_countdown = draw_text(str(time_left), color, Fonts.COUNTDOWN, square_rect_text)
     square_rect_countdown.top = square_rect_countdown.bottom - .15
     square_rect_countdown.height = .1
     draw_erase(square_rect_countdown)
@@ -190,20 +198,27 @@ def draw_countdown(turn, time_left, no_votes_message):
     draw_erase(square_rect_text, color=BLACK)
 
     if no_votes_message:
-        draw_text('Keine Votes!', color, status_font, square_rect_text)
+        draw_text('Keine Votes!', color, Fonts.STATUS, square_rect_text)
 
 def draw_scoreboard(score):
     colon_rect = SquareRect(7.85, 0, .3, 1)
-    draw_text(':', COLOR_BOARD, hack_font, colon_rect)
+    draw_hack_text(':', COLOR_BOARD, Fonts.SCORE, colon_rect)
 
-    left_player_number_rect = SquareRect(0, 0, colon_rect.left, 1)
-    left_player_number_text_rect = draw_text(str(score['left_player']), COLOR_LEFT_PLAYER, hack_font, left_player_number_rect, align=Align.RIGHT)
-    left_player_rect = SquareRect(0, 0, left_player_number_text_rect.left, 1)
-    draw_text(f"{config['players']['left_player']['name']} ", COLOR_LEFT_PLAYER, score_font, left_player_rect, align=Align.RIGHT)
+    left_player_rect = SquareRect(0, 0, colon_rect.left, 1)
+    left_player_rect.right = colon_rect.left
+    draw_hack_text(
+        f"{config['players']['left_player']['name']} {score['left_player']}",
+        COLOR_LEFT_PLAYER,
+        Fonts.SCORE,
+        left_player_rect,
+        align=Align.RIGHT
+    )
 
-    right_player_number_rect = SquareRect(colon_rect.right + .02, 0, 16, 1)
-    right_player_number_text_rect = draw_text(str(score['right_player']), COLOR_RIGHT_PLAYER, hack_font, right_player_number_rect, align=Align.LEFT)
-    right_player_rect = SquareRect(right_player_number_text_rect.right, 0, 16, 1)
-    draw_text(f" {config['players']['right_player']['name']}", COLOR_RIGHT_PLAYER, score_font, right_player_rect, align=Align.LEFT)
-
-    draw_erase(SquareRect(0, 0.75, 16, .1))
+    right_player_rect = SquareRect(colon_rect.right + 0.01, 0, colon_rect.left, 1)
+    draw_hack_text(
+        f"{score['right_player']} {config['players']['right_player']['name']}",
+        COLOR_RIGHT_PLAYER,
+        Fonts.SCORE,
+        right_player_rect,
+        align=Align.LEFT
+    )
