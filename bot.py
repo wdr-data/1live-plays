@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     video_id = input('Enter Video ID: ')
 
-    bot = Bot('testbot', bot_config, video_id, None)
+    bot = Bot('testbot', bot_config, None)
 
     for message in bot.messages():
         print(message)
