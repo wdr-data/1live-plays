@@ -13,6 +13,7 @@ pygame.init()
 import game_logic as game
 import ui
 from bot import Bot, Event, DemocracyMode
+from config import config
 
 class GameModes(Enum):
     DEMOCRACY = 'democracy'
@@ -35,21 +36,21 @@ try:
 except FileNotFoundError:
     print('No savegame found.')
     score = {
-        'pink': 0,
-        'white': 0,
+        'left_player': 0,
+        'right_player': 0,
     }
 
 game_over = False
-turn = 'pink'
+turn = 'left_player'
 turn_count = 0
 
 def get_current_player_number():
     global turn
-    return 1 if turn == 'pink' else 2
+    return 1 if turn == 'left_player' else 2
 
 def switch_turn():
     global turn
-    turn = 'pink' if turn == 'white' else 'white'
+    turn = 'left_player' if turn == 'right_player' else 'right_player'
 
 def game_loop(event):
     global turn, turn_count, game_over
@@ -110,20 +111,12 @@ def game_loop(event):
         ui.draw_erase(ui.Positions.GAME_END)
 
 
-pink_first = False
+left_player_first = False
 ui.draw_scoreboard(score)
 
 if DEBUG:
     queue = pygame.event
 else:
-    print('Loading config...')
-    try:
-        with open('config.json', 'r') as fp:
-            config = json.load(fp)
-    except FileNotFoundError:
-        print('Config file "config.json" not found.')
-        sys.exit(1)
-
     print(f'Starting gamemode "{MODE.value}"...')
 
     if MODE is GameModes.FIRST_COME_FIRST_SERVE:
@@ -189,9 +182,9 @@ while True:
     ui.draw_column_labels()
     pygame.display.update()
 
-    pink_first = not pink_first
+    left_player_first = not left_player_first
     game_over = False
-    turn = 'pink' if pink_first else 'white'
+    turn = 'left_player' if left_player_first else 'right_player'
     turn_count = 0
     no_votes = False
 

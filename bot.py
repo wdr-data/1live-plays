@@ -139,7 +139,7 @@ if __name__ == '__main__':
     import json
 
     with open('config.json', 'r') as fp:
-        bot_config = json.load(fp)['pink']
+        bot_config = json.load(fp)['left_player']
 
     video_id = input('Enter Video ID: ')
 

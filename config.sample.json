@@ -1,11 +1,13 @@
 {
-    "pink": {
-        "comment": "1LIVE",
+    "left_player": {
+        "name": "1LIVE",
+        "color": [255, 0, 153],
         "api_key": "",
         "video_id": ""
     },
-    "white": {
-        "comment": "1LIVE Comedy",
+    "right_player": {
+        "name": "1LIVE Comedy",
+        "color": [225, 225, 225],
         "api_key": "",
         "video_id": ""
     }
