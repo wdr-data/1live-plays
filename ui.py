@@ -226,8 +226,6 @@ def draw_countdown(turn, time_left, no_votes_message):
 
     square_rect_text.top = square_rect_text.bottom
     square_rect_text.height = 1
-    square_rect_text.left -= .5
-    square_rect_text.width += 1
     draw_erase(square_rect_text, color=BLACK)
 
     if no_votes_message:
