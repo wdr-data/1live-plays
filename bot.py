@@ -35,7 +35,7 @@ class DemocracyMode():
             }
             if len(filtered_votes) == 0:
                 if reset:
-                    print(f'No valid votes from "{self.bot.name}" yet!')
+                    print(f'No valid votes from "{self.bot.player}" yet!')
                 vote = None
             elif len(filtered_votes) == 1:
                 vote = list(filtered_votes.keys())[0]
@@ -52,7 +52,7 @@ class DemocracyMode():
         self.bot.start_polling()
         thread = Thread(target=self.run, args=())
         thread.daemon = True
-        print(f'Starting democracy thread for bot "{self.bot.name}"...')
+        print(f'Starting democracy thread for bot "{self.bot.player}"...')
         thread.start()
 
     def run(self):
@@ -60,7 +60,7 @@ class DemocracyMode():
             batch = self.queue_in.get()
             with self.votes_lock:
                 for event in batch:
-                    print(f'"{self.bot.name}" voting for {event.column}')
+                    print(f'"{self.bot.player}" voting for {event.column}')
                     self.votes[event.column] += 1
 
 
