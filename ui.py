@@ -16,8 +16,8 @@ RADIUS = int(HALF_SQUARE - 5)
 
 COLOR_BOARD = (137,149,155)
 BLACK = (0,0,0)
-COLOR_LEFT_PLAYER = config['left_player']['color']
-COLOR_RIGHT_PLAYER = config['right_player']['color']
+COLOR_LEFT_PLAYER = config['players']['left_player']['color']
+COLOR_RIGHT_PLAYER = config['players']['right_player']['color']
 
 BOARD_OFFSET_X = 4.5
 BOARD_OFFSET_Y = 3

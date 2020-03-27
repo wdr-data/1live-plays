@@ -1,14 +1,17 @@
 {
-    "left_player": {
-        "name": "1LIVE",
-        "color": [255, 0, 153],
-        "api_key": "",
-        "video_id": ""
+    "app": {
+        "api_key": ""
     },
-    "right_player": {
-        "name": "1LIVE Comedy",
-        "color": [225, 225, 225],
-        "api_key": "",
-        "video_id": ""
+    "players": {
+        "left_player": {
+            "name": "1LIVE",
+            "color": [255, 0, 153],
+            "video_id": ""
+        },
+        "right_player": {
+            "name": "1LIVE Comedy",
+            "color": [225, 225, 225],
+            "video_id": ""
+        }
     }
 }

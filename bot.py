@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from game_logic import COLUMN_COUNT
+from config import config
 
 class Event():
     def __init__(self, bot, column):
@@ -64,16 +65,16 @@ class DemocracyMode():
 
 
 class Bot():
-    def __init__(self, name, config, queue=None):
-        self.name = name
-        self.youtube = build('youtube', 'v3', developerKey=config['api_key'])
-        self.video_id = config['video_id']
+    def __init__(self, player, queue=None):
+        self.player = player
+        self.player_config = config['players'][player]
+        self.youtube = build('youtube', 'v3', developerKey=config['app']['api_key'])
         self.queue = queue
 
     def start_polling(self):
         thread = Thread(target=self.run, args=())
         thread.daemon = True
-        print(f'Starting polling thread for bot "{self.name}"...')
+        print(f'Starting polling thread for bot "{self.player}"...')
         thread.start()
 
     def run(self):
@@ -95,7 +96,7 @@ class Bot():
             self.queue.put(events)
 
     def messages(self):
-        request = self.youtube.videos().list(part='liveStreamingDetails', id=self.video_id)
+        request = self.youtube.videos().list(part='liveStreamingDetails', id=self.player_config['video_id'])
         response = request.execute()
 
         live_chat_id = response['items'][0]['liveStreamingDetails']['activeLiveChatId']
@@ -113,7 +114,7 @@ class Bot():
             try:
                 response = request.execute()
             except HttpError as e:
-                print(f'Polling-Error in bot "{self.name}":', e)
+                print(f'Polling-Error in bot "{self.player}":', e)
                 sleep(10)
                 continue
 
@@ -132,18 +133,11 @@ class Bot():
             ]
 
             polling_interval = response['pollingIntervalMillis'] / 1000
-            print(f'Bot "{self.name}" sleeping {round(polling_interval, 2)}s')
+            print(f'Bot "{self.player}" sleeping {round(polling_interval, 2)}s')
             sleep(polling_interval)
 
 if __name__ == '__main__':
-    import json
-
-    with open('config.json', 'r') as fp:
-        bot_config = json.load(fp)['left_player']
-
-    video_id = input('Enter Video ID: ')
-
-    bot = Bot('testbot', bot_config, None)
+    bot = Bot('left_player')
 
     for message in bot.messages():
         print(message)

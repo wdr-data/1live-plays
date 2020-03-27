@@ -43,6 +43,7 @@ except FileNotFoundError:
 game_over = False
 turn = 'left_player'
 turn_count = 0
+no_votes = False
 
 def get_current_player_number():
     global turn
@@ -123,8 +124,8 @@ else:
         print('Connecting bots...')
         queue = Queue()
         bots = {}
-        for bot_name, bot_config in config.items():
-            bots[bot_name] = Bot(bot_name, bot_config, queue)
+        for player in config['players']:
+            bots[player] = Bot(player, queue)
 
         for bot in bots.values():
             bot.start_polling()
@@ -132,9 +133,9 @@ else:
         print('Connecting bots...')
 
         democracies = {}
-        for bot_name, bot_config in config.items():
-            bot = Bot(bot_name, bot_config)
-            democracies[bot_name] = DemocracyMode(bot)
+        for player in config['players']:
+            bot = Bot(player)
+            democracies[player] = DemocracyMode(bot)
 
         for democracy in democracies.values():
             democracy.start()
