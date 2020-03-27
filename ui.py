@@ -35,7 +35,10 @@ class Fonts:
     GAME_END = SCORE
     COUNTDOWN = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5))
     STATUS = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
-    STATUS_LARGE = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 5))
+    STATUS_LARGE = {
+        name: pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 5 * (5 / len(player['name']))))
+        for name, player in config['players'].items()
+    }
 
 if os.environ.get('FULLSCREEN'):
     screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
@@ -43,11 +46,12 @@ else:
     screen = pygame.display.set_mode(size)
 
 class Positions:
-    CURRENT_PLAYER_LEFT_PLAYER_LEFT = .5
-    CURRENT_PLAYER_RIGHT_PLAYER_LEFT = 12
-    GAME_END = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
+    SCORE_HEIGHT = 1.0
+    CURRENT_PLAYER_LEFT_PLAYER_LEFT = .1
+    CURRENT_PLAYER_RIGHT_PLAYER_LEFT = 11.6
+    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 4.4, 2)
+    GAME_END = SquareRect(0, 1, 16, 1)
     CURRENT_VOTE = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
-    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 3.5, 2)
     COUNTDOWN = SquareRect(0, 5.5, 3.5, 2)
 
 class Align(Enum):
@@ -66,7 +70,17 @@ def draw_text(text, color, font, square_rect, align=Align.CENTER):
 
     drawn_text = font.render(text, 1, color)
 
+    if not text:
+        height_offset_umlaut = 0
+    elif len(text) == 1:
+        height_offset_umlaut = font.get_ascent() - font.metrics(text)[0][3]
+    else:
+        height_offset_umlaut = font.get_ascent() - max(*[metric[3] for metric in font.metrics(text)])
+
+    height_offset_umlaut = min(0, height_offset_umlaut)
+
     text_rect = drawn_text.get_rect(center=(rect.left + int(rect.width / 2), rect.top + int(rect.height / 2)))
+    text_rect.top += height_offset_umlaut / 2
 
     if align is Align.LEFT:
         text_rect.left = rect.left
@@ -87,6 +101,8 @@ def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
     erase_rect = text_rect.copy()
     erase_rect.top = erase_rect.bottom - .1 * text_rect.height
     erase_rect.height = .05 * text_rect.height
+    erase_rect.left -= .01 * text_rect.height
+    erase_rect.width += .02 * text_rect.height
     draw_erase(erase_rect)
     return text_rect
 
@@ -160,7 +176,7 @@ def draw_current_player(turn):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_text(text, color, Fonts.STATUS_LARGE, square_rect_text)
+    draw_hack_text(text, color, Fonts.STATUS_LARGE[turn], square_rect_text)
 
     square_rect_text.height = 1
     square_rect_erase.height = 1
@@ -201,10 +217,10 @@ def draw_countdown(turn, time_left, no_votes_message):
         draw_text('Keine Votes!', color, Fonts.STATUS, square_rect_text)
 
 def draw_scoreboard(score):
-    colon_rect = SquareRect(7.85, 0, .3, 1)
+    colon_rect = SquareRect(7.85, 0, .3, Positions.SCORE_HEIGHT)
     draw_hack_text(':', COLOR_BOARD, Fonts.SCORE, colon_rect)
 
-    left_player_rect = SquareRect(0, 0, colon_rect.left, 1)
+    left_player_rect = SquareRect(0, 0, colon_rect.left, Positions.SCORE_HEIGHT)
     left_player_rect.right = colon_rect.left
     draw_hack_text(
         f"{config['players']['left_player']['name']} {score['left_player']}",
@@ -214,7 +230,10 @@ def draw_scoreboard(score):
         align=Align.RIGHT
     )
 
-    right_player_rect = SquareRect(colon_rect.right + 0.01, 0, colon_rect.left, 1)
+    right_player_rect = SquareRect(
+        colon_rect.right + 0.01, 0,
+        colon_rect.left, Positions.SCORE_HEIGHT,
+    )
     draw_hack_text(
         f"{score['right_player']} {config['players']['right_player']['name']}",
         COLOR_RIGHT_PLAYER,
