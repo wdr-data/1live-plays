@@ -105,10 +105,7 @@ def draw_board():
                 pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
 
 def draw_current_vote(vote, turn):
-    if turn == 'left_player':
-        color = COLOR_LEFT_PLAYER
-    else:
-        color = COLOR_RIGHT_PLAYER
+    color = config['players'][turn]['color']
 
     left = int((BOARD_OFFSET_X + vote) * SQUARESIZE)
     top = int(Positions.CURRENT_VOTE.top * SQUARESIZE)
@@ -131,25 +128,20 @@ def draw_game_end(turn, tie=False):
     if tie:
         color = COLOR_BOARD
         text = "Unentschieden!"
-    elif turn == 'left_player':
-        color = COLOR_LEFT_PLAYER
-        text = "1LIVE gewinnt!"
     else:
-        color = COLOR_RIGHT_PLAYER
-        text = "2LIVE gewinnt!"
+        color = config['players'][turn]['color']
+        text = f"{config['players'][turn]['name']} gewinnt!"
 
     draw_text(text, color, status_font, Positions.GAME_END)
 
 def draw_current_player(turn):
+    color = config['players'][turn]['color']
+    text = config['players'][turn]['name']
 
     if turn == 'left_player':
-        color = COLOR_LEFT_PLAYER
-        text = "1LIVE"
         text_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
     else:
-        color = COLOR_RIGHT_PLAYER
-        text = "2LIVE"
         text_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
 
@@ -170,13 +162,12 @@ def draw_current_player(turn):
     draw_text('ist dran', color, status_font, square_rect_text)
 
 def draw_countdown(turn, time_left, no_votes_message):
+    color = config['players'][turn]['color']
 
     if turn == 'left_player':
-        color = COLOR_LEFT_PLAYER
         text_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
     else:
-        color = COLOR_RIGHT_PLAYER
         text_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
 
@@ -208,11 +199,11 @@ def draw_scoreboard(score):
     left_player_number_rect = SquareRect(0, 0, colon_rect.left, 1)
     left_player_number_text_rect = draw_text(str(score['left_player']), COLOR_LEFT_PLAYER, hack_font, left_player_number_rect, align=Align.RIGHT)
     left_player_rect = SquareRect(0, 0, left_player_number_text_rect.left, 1)
-    draw_text('1LIVE ', COLOR_LEFT_PLAYER, score_font, left_player_rect, align=Align.RIGHT)
+    draw_text(f"{config['players']['left_player']['name']} ", COLOR_LEFT_PLAYER, score_font, left_player_rect, align=Align.RIGHT)
 
     right_player_number_rect = SquareRect(colon_rect.right + .02, 0, 16, 1)
     right_player_number_text_rect = draw_text(str(score['right_player']), COLOR_RIGHT_PLAYER, hack_font, right_player_number_rect, align=Align.LEFT)
     right_player_rect = SquareRect(right_player_number_text_rect.right, 0, 16, 1)
-    draw_text(' 2LIVE', COLOR_RIGHT_PLAYER, score_font, right_player_rect, align=Align.LEFT)
+    draw_text(f" {config['players']['right_player']['name']}", COLOR_RIGHT_PLAYER, score_font, right_player_rect, align=Align.LEFT)
 
     draw_erase(SquareRect(0, 0.75, 16, .1))
