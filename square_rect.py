@@ -19,7 +19,7 @@ class SquareRect():
         return self.top + self.height
 
     def set_bottom(self, value):
-        self.top = value - self.heigh
+        self.top = value - self.height
 
     bottom = property(get_bottom, set_bottom)
 
