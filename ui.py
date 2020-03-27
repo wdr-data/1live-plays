@@ -106,21 +106,22 @@ def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
     draw_erase(erase_rect)
     return text_rect
 
-def draw_piece(left, top, color):
+def draw_piece(left, top, color, scale=1):
     pygame.gfxdraw.filled_circle(
         screen,
         int(left * SQUARESIZE) + HALF_SQUARE,
         int(top * SQUARESIZE) + HALF_SQUARE,
-        RADIUS,
+        int(RADIUS * scale),
         color,
     )
-    pygame.gfxdraw.aacircle(
-        screen,
-        int(left * SQUARESIZE) + HALF_SQUARE,
-        int(top * SQUARESIZE) + HALF_SQUARE,
-        RADIUS,
-        color,
-    )
+    for _ in range(2):
+        pygame.gfxdraw.aacircle(
+            screen,
+            int(left * SQUARESIZE) + HALF_SQUARE,
+            int(top * SQUARESIZE) + HALF_SQUARE,
+            int(RADIUS * scale),
+            color,
+        )
 
 def draw_board():
     flipped_board = np.flip(game.board, 0)
@@ -238,22 +239,24 @@ def draw_scoreboard(score):
 
     left_player_rect = SquareRect(0, 0, colon_rect.left, Positions.SCORE_HEIGHT)
     left_player_rect.right = colon_rect.left
-    draw_hack_text(
+    left_text_rect = draw_hack_text(
         f"{config['players']['left_player']['name']} {score['left_player']}",
         COLOR_LEFT_PLAYER,
         Fonts.SCORE,
         left_player_rect,
         align=Align.RIGHT
     )
+    draw_piece(left_text_rect.left - 1, -.06, COLOR_LEFT_PLAYER, scale=.75)
 
     right_player_rect = SquareRect(
         colon_rect.right + 0.01, 0,
         colon_rect.left, Positions.SCORE_HEIGHT,
     )
-    draw_hack_text(
+    right_text_rect = draw_hack_text(
         f"{score['right_player']} {config['players']['right_player']['name']}",
         COLOR_RIGHT_PLAYER,
         Fonts.SCORE,
         right_player_rect,
         align=Align.LEFT
     )
+    draw_piece(right_text_rect.right, -.06, COLOR_RIGHT_PLAYER, scale=.75)
