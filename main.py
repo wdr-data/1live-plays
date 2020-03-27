@@ -176,6 +176,8 @@ def mode_democracy():
     game_loop(event)
     ui.draw_erase(ui.Positions.CURRENT_VOTE)
 
+sleep(1)
+
 while True:
     game.create_board()
 
