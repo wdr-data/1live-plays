@@ -106,37 +106,53 @@ def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
     draw_erase(erase_rect)
     return text_rect
 
+def draw_piece(left, top, color):
+    pygame.gfxdraw.filled_circle(
+        screen,
+        int(left * SQUARESIZE) + HALF_SQUARE,
+        int(top * SQUARESIZE) + HALF_SQUARE,
+        RADIUS,
+        color,
+    )
+    pygame.gfxdraw.aacircle(
+        screen,
+        int(left * SQUARESIZE) + HALF_SQUARE,
+        int(top * SQUARESIZE) + HALF_SQUARE,
+        RADIUS,
+        color,
+    )
+
 def draw_board():
     flipped_board = np.flip(game.board, 0)
 
     for c in range(game.COLUMN_COUNT):
         for r in range(game.ROW_COUNT):
-            xpos = int(c * SQUARESIZE + BOARD_OFFSET_X * SQUARESIZE)
-            ypos = int(r * SQUARESIZE + BOARD_OFFSET_Y * SQUARESIZE)
+            left = c + BOARD_OFFSET_X
+            top = r + BOARD_OFFSET_Y
 
-            pygame.draw.rect(screen, COLOR_BOARD, (xpos, ypos, SQUARESIZE, SQUARESIZE))
+            pygame.draw.rect(
+                screen,
+                COLOR_BOARD,
+                (int(left * SQUARESIZE), int(top * SQUARESIZE), SQUARESIZE, SQUARESIZE)
+            )
 
             if flipped_board[r][c] == 1:
-                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, COLOR_LEFT_PLAYER)
-                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, COLOR_LEFT_PLAYER)
+                draw_piece(left, top, COLOR_LEFT_PLAYER)
 
             elif flipped_board[r][c] == 2:
-                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, COLOR_RIGHT_PLAYER)
-                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, COLOR_RIGHT_PLAYER)
+                draw_piece(left, top, COLOR_RIGHT_PLAYER)
 
             else:
-                pygame.gfxdraw.filled_circle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
-                pygame.gfxdraw.aacircle(screen, xpos + HALF_SQUARE, ypos + HALF_SQUARE, RADIUS, BLACK)
+                draw_piece(left, top, BLACK)
 
 def draw_current_vote(vote, turn):
     color = config['players'][turn]['color']
 
-    left = int((BOARD_OFFSET_X + vote) * SQUARESIZE)
-    top = int(Positions.CURRENT_VOTE.top * SQUARESIZE)
+    left = BOARD_OFFSET_X + vote
+    top = Positions.CURRENT_VOTE.top
 
     draw_erase(Positions.CURRENT_VOTE)
-    pygame.gfxdraw.filled_circle(screen, left + HALF_SQUARE, top + HALF_SQUARE, RADIUS, color)
-    pygame.gfxdraw.aacircle(screen, left + HALF_SQUARE, top + HALF_SQUARE, RADIUS, color)
+    draw_piece(left, top, color)
 
 def draw_column_labels():
     for c in range(game.COLUMN_COUNT):
