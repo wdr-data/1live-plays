@@ -52,7 +52,7 @@ class Positions:
     CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 4.4, 2)
     GAME_END = SquareRect(0, 1, 16, 1)
     CURRENT_VOTE = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
-    COUNTDOWN = SquareRect(0, 5.5, 3.5, 2)
+    COUNTDOWN = SquareRect(0, 5.5, 4.4, 2)
 
 class Align(Enum):
     CENTER = 'center'
