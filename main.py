@@ -81,7 +81,7 @@ def game_loop(event):
         else:
             return
     else:
-        if event.bot.name != turn:
+        if event.bot.player != turn:
             return
         col = event.column
 
