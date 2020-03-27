@@ -99,10 +99,10 @@ def draw_text(text, color, font, square_rect, align=Align.CENTER):
 def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
     text_rect = draw_text(text, color, font, square_rect, align=align)
     erase_rect = text_rect.copy()
-    erase_rect.top = erase_rect.bottom - .1 * text_rect.height
-    erase_rect.height = .05 * text_rect.height
-    erase_rect.left -= .01 * text_rect.height
-    erase_rect.width += .02 * text_rect.height
+    erase_rect.top = erase_rect.bottom - .11 * text_rect.height
+    erase_rect.height = .07 * text_rect.height
+    erase_rect.left -= .05 * text_rect.height
+    erase_rect.width += .1 * text_rect.height
     draw_erase(erase_rect)
     return text_rect
 
