@@ -19,8 +19,8 @@ class GameModes(Enum):
     DEMOCRACY = 'democracy'
     FIRST_COME_FIRST_SERVE = 'first_come_first_serve'
 
-DEBUG = os.environ.get('DEBUG', False)
-MODE = GameModes.DEMOCRACY
+DEBUG = config['app']['debug']
+MODE = GameModes(config['app']['game_mode'])
 DEMOCRACY_TIMEOUT = 15
 
 if DEBUG:

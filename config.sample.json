@@ -1,6 +1,8 @@
 {
     "app": {
-        "api_key": ""
+        "debug": false,
+        "api_key": "",
+        "game_mode": "democracy"
     },
     "players": {
         "left_player": {
