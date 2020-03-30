@@ -10,20 +10,24 @@ from game_logic import COLUMN_COUNT
 from config import config
 
 class Event():
-    def __init__(self, bot, column):
+    def __init__(self, bot, column, voter=None):
         self.bot = bot
         self.column = column
+        self.voter = voter
 
 class DemocracyMode():
     def __init__(self, bot):
         self.bot = bot
         self.queue_in = Queue()
 
+        self.one_vote_per_person = config['app'].get('one_vote_per_person', True)
+
         self.votes_lock = RLock()
         self.reset_votes()
 
     def reset_votes(self):
         with self.votes_lock:
+            self.voters = dict()
             self.votes = defaultdict(int)
 
     def get_vote(self, valid_locations, reset=False):
@@ -61,7 +65,14 @@ class DemocracyMode():
             with self.votes_lock:
                 for event in batch:
                     print(f'"{self.bot.player}" voting for {event.column}')
+
+                    # Clear previous vote
+                    if self.one_vote_per_person and event.voter in self.voters:
+                        vote = self.voters[event.voter]
+                        self.votes[event.column] -= 1
+
                     self.votes[event.column] += 1
+                    self.voters[event.voter] = event.column
 
 
 class Bot():
@@ -81,8 +92,11 @@ class Bot():
         for batch in self.messages():
             events = []
             for message in batch:
+                text = message['text']
+                author = message['author']
+
                 try:
-                    column = int(message)
+                    column = int(text)
                 except ValueError:
                     # ignore messages that aren't numbers
                     continue
@@ -91,7 +105,7 @@ class Bot():
                     # ignore numbers that don't correspond to a column
                     continue
 
-                events.append(Event(self, column - 1))
+                events.append(Event(self, column - 1, voter=author))
 
             self.queue.put(events)
 
@@ -128,7 +142,10 @@ class Bot():
             items = response['items']
 
             yield [
-                item['snippet']['textMessageDetails']['messageText']
+                {
+                    'author': item['snippet']['authorChannelId'],
+                    'text': item['snippet']['textMessageDetails']['messageText'],
+                }
                 for item in items
             ]
 

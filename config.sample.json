@@ -2,7 +2,8 @@
     "app": {
         "debug": false,
         "api_key": "",
-        "game_mode": "democracy"
+        "game_mode": "democracy",
+        "one_vote_per_person": true
     },
     "players": {
         "left_player": {
