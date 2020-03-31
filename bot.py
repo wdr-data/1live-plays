@@ -68,8 +68,9 @@ class DemocracyMode():
 
                     # Clear previous vote
                     if self.one_vote_per_person and event.voter in self.voters:
+                        print(f'Reverting previous vote for {self.bot.player} from player {event.voter}')
                         vote = self.voters[event.voter]
-                        self.votes[event.column] -= 1
+                        self.votes[vote] -= 1
 
                     self.votes[event.column] += 1
                     self.voters[event.voter] = event.column
