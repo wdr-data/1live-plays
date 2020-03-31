@@ -21,9 +21,21 @@ class DemocracyMode():
         self.queue_in = Queue()
 
         self.one_vote_per_person = config['app'].get('one_vote_per_person', True)
+        self.prevent_switching_sides = config['app'].get('prevent_switching_sides', False)
+
+        self.opponent = None
 
         self.votes_lock = RLock()
         self.reset_votes()
+
+        self.new_game()
+
+    def new_game(self):
+        with self.votes_lock:
+            self.voters_this_game = set()
+
+    def has_voted_this_game(self, voter):
+        return voter in self.voters_this_game
 
     def reset_votes(self):
         with self.votes_lock:
@@ -64,7 +76,14 @@ class DemocracyMode():
             batch = self.queue_in.get()
             with self.votes_lock:
                 for event in batch:
-                    print(f'"{self.bot.player}" voting for {event.column}')
+                    print(f'"{self.bot.player}" voting for {event.column + 1}')
+
+                    # Prevent switching sides
+                    if self.prevent_switching_sides and self.opponent.has_voted_this_game(event.voter):
+                        print(f'Ignoring vote for {self.bot.player} from opponent player {event.voter}')
+                        continue
+
+                    self.voters_this_game.add(event.voter)
 
                     # Clear previous vote
                     if self.one_vote_per_person and event.voter in self.voters:

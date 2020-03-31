@@ -137,6 +137,9 @@ else:
             bot = Bot(player)
             democracies[player] = DemocracyMode(bot)
 
+        democracies['left_player'].opponent = democracies['right_player']
+        democracies['right_player'].opponent = democracies['left_player']
+
         for democracy in democracies.values():
             democracy.start()
 
@@ -190,6 +193,10 @@ while True:
     turn = 'left_player' if left_player_first else 'right_player'
     turn_count = 0
     no_votes = False
+
+    if MODE is GameModes.DEMOCRACY:
+        for democracy in democracies.values():
+            democracy.new_game()
 
     while not game_over:
 

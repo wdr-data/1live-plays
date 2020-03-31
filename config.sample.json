@@ -3,7 +3,8 @@
         "debug": false,
         "api_key": "",
         "game_mode": "democracy",
-        "one_vote_per_person": true
+        "one_vote_per_person": true,
+        "prevent_switching_sides": false
     },
     "players": {
         "left_player": {
