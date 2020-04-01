@@ -6,11 +6,11 @@ ffmpeg \
 -i :20 \
 -f lavfi -i anullsrc \
 -c:v libx264 \
--b:v 3000k \
+-b:v 2500k \
 -pix_fmt yuv420p \
 -preset medium \
 -r 30 \
--g 60 \
+-g 30 \
 -s 1280x720 \
 -acodec libmp3lame -ar 44100 -b:a 128k \
 -threads 0 \
