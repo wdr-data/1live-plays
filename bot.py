@@ -2,6 +2,7 @@ from time import sleep
 from threading import Thread, RLock
 from queue import Queue
 from collections import defaultdict
+import logging
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -51,7 +52,7 @@ class DemocracyMode():
             }
             if len(filtered_votes) == 0:
                 if reset:
-                    print(f'No valid votes from "{self.bot.player}" yet!')
+                    logging.debug(f'No valid votes from "{self.bot.player}" yet!')
                 vote = None
             elif len(filtered_votes) == 1:
                 vote = list(filtered_votes.keys())[0]
@@ -68,7 +69,7 @@ class DemocracyMode():
         self.bot.start_polling()
         thread = Thread(target=self.run, args=())
         thread.daemon = True
-        print(f'Starting democracy thread for bot "{self.bot.player}"...')
+        logging.info(f'Starting democracy thread for bot "{self.bot.player}"...')
         thread.start()
 
     def run(self):
@@ -76,18 +77,18 @@ class DemocracyMode():
             batch = self.queue_in.get()
             with self.votes_lock:
                 for event in batch:
-                    print(f'"{self.bot.player}" voting for {event.column + 1}')
+                    logging.debug(f'"{self.bot.player}" voting for {event.column + 1}')
 
                     # Prevent switching sides
                     if self.prevent_switching_sides and self.opponent.has_voted_this_game(event.voter):
-                        print(f'Ignoring vote for {self.bot.player} from opponent player {event.voter}')
+                        logging.debug(f'Ignoring vote for {self.bot.player} from opponent player {event.voter}')
                         continue
 
                     self.voters_this_game.add(event.voter)
 
                     # Clear previous vote
                     if self.one_vote_per_person and event.voter in self.voters:
-                        print(f'Reverting previous vote for {self.bot.player} from player {event.voter}')
+                        logging.debug(f'Reverting previous vote for {self.bot.player} from player {event.voter}')
                         vote = self.voters[event.voter]
                         self.votes[vote] -= 1
 
@@ -105,7 +106,7 @@ class Bot():
     def start_polling(self):
         thread = Thread(target=self.run, args=())
         thread.daemon = True
-        print(f'Starting polling thread for bot "{self.player}"...')
+        logging.info(f'Starting polling thread for bot "{self.player}"...')
         thread.start()
 
     def run(self):
@@ -138,40 +139,41 @@ class Bot():
         first_run = True
 
         while True:
-            request = self.youtube.liveChatMessages().list(
-                liveChatId=live_chat_id,
-                part="id,snippet",
-                pageToken=page_token,
-                maxResults=2000,
-            )
-
             try:
+                request = self.youtube.liveChatMessages().list(
+                    liveChatId=live_chat_id,
+                    part="id,snippet",
+                    pageToken=page_token,
+                    maxResults=2000,
+                )
+
                 response = request.execute()
-            except HttpError as e:
-                print(f'Polling-Error in bot "{self.player}":', e)
+
+                page_token = response['nextPageToken']
+
+                if first_run:
+                    first_run = False
+                    sleep(response['pollingIntervalMillis'] / 1000)
+                    continue
+
+                items = response['items']
+
+                yield [
+                    {
+                        'author': item['snippet']['authorChannelId'],
+                        'text': item['snippet']['textMessageDetails']['messageText'],
+                    }
+                    for item in items
+                ]
+
+                polling_interval = response['pollingIntervalMillis'] / 1000
+                logging.debug(f'Bot "{self.player}" sleeping {round(polling_interval, 2)}s')
+                sleep(polling_interval)
+
+            except Exception:
+                logging.exception(f'Polling-Error in bot "{self.player}"')
                 sleep(10)
                 continue
-
-            page_token = response['nextPageToken']
-
-            if first_run:
-                first_run = False
-                sleep(response['pollingIntervalMillis'] / 1000)
-                continue
-
-            items = response['items']
-
-            yield [
-                {
-                    'author': item['snippet']['authorChannelId'],
-                    'text': item['snippet']['textMessageDetails']['messageText'],
-                }
-                for item in items
-            ]
-
-            polling_interval = response['pollingIntervalMillis'] / 1000
-            print(f'Bot "{self.player}" sleeping {round(polling_interval, 2)}s')
-            sleep(polling_interval)
 
 if __name__ == '__main__':
     bot = Bot('left_player')

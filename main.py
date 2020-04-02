@@ -5,6 +5,12 @@ import json
 from time import time, sleep
 from enum import Enum
 from queue import Queue
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
 
 import pygame
 
@@ -34,7 +40,7 @@ try:
     with open(SAVEGAME, 'r') as fp:
         score = json.load(fp)
 except FileNotFoundError:
-    print('No savegame found.')
+    logging.warning('No savegame found.')
     score = {
         'left_player': 0,
         'right_player': 0,
@@ -118,10 +124,10 @@ ui.draw_scoreboard(score)
 if DEBUG:
     queue = pygame.event
 else:
-    print(f'Starting gamemode "{MODE.value}"...')
+    logging.info(f'Starting gamemode "{MODE.value}"...')
 
     if MODE is GameModes.FIRST_COME_FIRST_SERVE:
-        print('Connecting bots...')
+        logging.debug('Connecting bots...')
         queue = Queue()
         bots = {}
         for player in config['players']:
@@ -130,7 +136,7 @@ else:
         for bot in bots.values():
             bot.start_polling()
     elif MODE is GameModes.DEMOCRACY:
-        print('Connecting bots...')
+        logging.debug('Connecting bots...')
 
         democracies = {}
         for player in config['players']:
