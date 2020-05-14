@@ -4,6 +4,8 @@ import os
 import pygame
 import pygame.gfxdraw
 import pygame.ftfont
+import pygame.image
+import pygame.transform
 import numpy as np
 
 import game_logic as game
@@ -29,6 +31,11 @@ size = (screen_width, screen_height)
 
 pygame.ftfont.init()
 
+if os.environ.get('FULLSCREEN'):
+    screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+else:
+    screen = pygame.display.set_mode(size)
+
 class Fonts:
     SCORE = pygame.ftfont.Font("fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3))
     NUMBERS = SCORE
@@ -40,10 +47,18 @@ class Fonts:
         for name, player in config['players'].items()
     }
 
-if os.environ.get('FULLSCREEN'):
-    screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
-else:
-    screen = pygame.display.set_mode(size)
+class Images:
+    LOGOS = {
+        player: pygame.image.load(f'images/logo_{player}.png').convert_alpha()
+        for player in config['players']
+    }
+    SCORE_LOGOS = {
+        player: pygame.transform.smoothscale(
+            surf,
+            (int(surf.get_width() *  SQUARESIZE / surf.get_height()), SQUARESIZE)
+        )
+        for player, surf in LOGOS.items()
+    }
 
 class Positions:
     SCORE_HEIGHT = 1.0
@@ -89,12 +104,7 @@ def draw_text(text, color, font, square_rect, align=Align.CENTER):
 
     screen.blit(drawn_text, text_rect)
 
-    return SquareRect(
-        text_rect.left / SQUARESIZE,
-        text_rect.top / SQUARESIZE,
-        text_rect.width / SQUARESIZE,
-        text_rect.height / SQUARESIZE,
-    )
+    return SquareRect.from_rect(text_rect, SQUARESIZE)
 
 def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
     text_rect = draw_text(text, color, font, square_rect, align=align)
@@ -122,6 +132,13 @@ def draw_piece(left, top, color, scale=1):
             int(RADIUS * scale),
             color,
         )
+
+def draw_image(source, rect):
+    draw_erase(rect)
+    return SquareRect.from_rect(
+        screen.blit(source, rect.get_rect(SQUARESIZE)),
+        SQUARESIZE,
+    )
 
 def draw_board():
     flipped_board = np.flip(game.board, 0)
@@ -238,23 +255,33 @@ def draw_scoreboard(score):
     left_player_rect = SquareRect(0, 0, colon_rect.left, Positions.SCORE_HEIGHT)
     left_player_rect.right = colon_rect.left
     left_text_rect = draw_hack_text(
-        f"{config['players']['left_player']['name']} {score['left_player']}",
+        f" {score['left_player']}",
         COLOR_LEFT_PLAYER,
         Fonts.SCORE,
         left_player_rect,
         align=Align.RIGHT
     )
-    draw_piece(left_text_rect.left - 1, -.06, COLOR_LEFT_PLAYER, scale=.75)
+    left_logo_rect = left_text_rect.copy()
+    left_logo_rect.width = Images.SCORE_LOGOS['left_player'].get_width() / SQUARESIZE
+    left_logo_rect.right = left_logo_rect.left
+    left_logo_rect.top = -.04
+    left_logo_rect = draw_image(Images.SCORE_LOGOS['left_player'], left_logo_rect)
+    draw_piece(left_logo_rect.left - 1, -.06, COLOR_LEFT_PLAYER, scale=.75)
 
     right_player_rect = SquareRect(
         colon_rect.right + 0.01, 0,
         colon_rect.left, Positions.SCORE_HEIGHT,
     )
     right_text_rect = draw_hack_text(
-        f"{score['right_player']} {config['players']['right_player']['name']}",
+        f"{score['right_player']} ",
         COLOR_RIGHT_PLAYER,
         Fonts.SCORE,
         right_player_rect,
         align=Align.LEFT
     )
-    draw_piece(right_text_rect.right, -.06, COLOR_RIGHT_PLAYER, scale=.75)
+    right_logo_rect = right_text_rect.copy()
+    right_logo_rect.width = Images.SCORE_LOGOS['right_player'].get_width() / SQUARESIZE
+    right_logo_rect.left = right_text_rect.right
+    right_logo_rect.top = -.04
+    right_logo_rect = draw_image(Images.SCORE_LOGOS['right_player'], right_logo_rect)
+    draw_piece(right_logo_rect.right, -.06, COLOR_RIGHT_PLAYER, scale=.75)

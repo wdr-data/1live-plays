@@ -7,6 +7,15 @@ class SquareRect():
         self.width = width
         self.height = height
 
+    @staticmethod
+    def from_rect(rect, squaresize):
+        return SquareRect(
+            rect.left / squaresize,
+            rect.top / squaresize,
+            rect.width / squaresize,
+            rect.height / squaresize,
+        )
+
     def get_right(self):
         return self.left + self.width
 
