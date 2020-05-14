@@ -74,10 +74,10 @@ class Positions:
     SCORE_HEIGHT = 1.0
     CURRENT_PLAYER_LEFT_PLAYER_LEFT = .25
     CURRENT_PLAYER_RIGHT_PLAYER_LEFT = 11.75
-    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 4, 2)
+    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y - 1, 4, 3)
     GAME_END = SquareRect(0, 1, 16, 1)
     CURRENT_VOTE = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
-    COUNTDOWN = SquareRect(0, 5.5, 4.4, 2)
+    COUNTDOWN = SquareRect(0, 6, 4.4, 2)
 
 class Align(Enum):
     CENTER = 'center'
@@ -143,11 +143,19 @@ def draw_piece(left, top, color, scale=1):
             color,
         )
 
-def draw_image(source, rect):
+def draw_image(source, rect, center_vertical=False, center_horizontal=False):
     draw_erase(rect)
 
+    rect = rect.get_rect(SQUARESIZE)
+
+    if center_vertical:
+        rect.top += int((rect.height - source.get_height()) / 2)
+
+    if center_horizontal:
+        rect.left += int((rect.width - source.get_width()) / 2)
+
     return SquareRect.from_rect(
-        screen.blit(source, rect.get_rect(SQUARESIZE)),
+        screen.blit(source, rect),
         SQUARESIZE,
     )
 
@@ -214,21 +222,21 @@ def draw_current_player(turn):
         text_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
 
-    square_rect_text = Positions.CURRENT_PLAYER.copy()
-    square_rect_text.left = text_left
+    square_rect_logo = Positions.CURRENT_PLAYER.copy()
+    square_rect_logo.left = text_left
 
     square_rect_erase = Positions.CURRENT_PLAYER.copy()
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_image(Images.STATUS_LOGOS[turn], square_rect_text)
+    draw_image(Images.STATUS_LOGOS[turn], square_rect_logo, center_vertical=True)
 
-    square_rect_text.height = 1
+    square_rect_logo.height = 1
     square_rect_erase.height = 1
-    square_rect_text.top += 1.5
-    square_rect_erase.top += 1.5
+    square_rect_logo.top += 3
+    square_rect_erase.top += 3
     draw_erase(square_rect_erase)
-    draw_text('ist dran', color, Fonts.STATUS, square_rect_text)
+    draw_text('ist dran', color, Fonts.STATUS, square_rect_logo)
 
 def draw_countdown(turn, time_left, no_votes_message):
     color = config['players'][turn]['color']
