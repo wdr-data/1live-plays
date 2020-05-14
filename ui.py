@@ -161,16 +161,20 @@ def draw_piece(left, top, color, scale=1):
         )
 
 
-def draw_image(source, rect, center_vertical=False, center_horizontal=False):
+def draw_image(source, rect, vertical_align="top", horizontal_align="left"):
     draw_erase(rect)
 
     rect = rect.get_rect(SQUARESIZE)
 
-    if center_vertical:
+    if vertical_align == "center":
         rect.top += int((rect.height - source.get_height()) / 2)
+    elif vertical_align == "bottom":
+        rect.top += int(rect.height - source.get_height())
 
-    if center_horizontal:
+    if horizontal_align == "center":
         rect.left += int((rect.width - source.get_width()) / 2)
+    elif horizontal_align == "right":
+        rect.left += int(rect.width - source.get_width())
 
     return SquareRect.from_rect(screen.blit(source, rect), SQUARESIZE,)
 
@@ -244,7 +248,7 @@ def draw_current_player(turn):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_image(Images.STATUS_LOGOS[turn], square_rect_logo, center_vertical=True)
+    draw_image(Images.STATUS_LOGOS[turn], square_rect_logo, vertical_align="bottom")
 
     square_rect_logo.height = 1
     square_rect_erase.height = 1
