@@ -266,33 +266,23 @@ def draw_scoreboard(score):
     left_player_rect = SquareRect(0, 0, colon_rect.left, Positions.SCORE_HEIGHT)
     left_player_rect.right = colon_rect.left
     left_text_rect = draw_hack_text(
-        f" {score['left_player']}",
+        f"{config['players']['left_player']['name']} {score['left_player']}",
         COLOR_LEFT_PLAYER,
         Fonts.SCORE,
         left_player_rect,
         align=Align.RIGHT
     )
-    left_logo_rect = left_text_rect.copy()
-    left_logo_rect.width = Images.SCORE_LOGOS['left_player'].get_width() / SQUARESIZE
-    left_logo_rect.right = left_logo_rect.left
-    left_logo_rect.top = -.04
-    left_logo_rect = draw_image(Images.SCORE_LOGOS['left_player'], left_logo_rect)
-    draw_piece(left_logo_rect.left - 1, -.06, COLOR_LEFT_PLAYER, scale=.75)
+    draw_piece(left_text_rect.left - 1, -.06, COLOR_LEFT_PLAYER, scale=.75)
 
     right_player_rect = SquareRect(
         colon_rect.right + 0.01, 0,
         colon_rect.left, Positions.SCORE_HEIGHT,
     )
     right_text_rect = draw_hack_text(
-        f"{score['right_player']} ",
+        f"{score['right_player']} {config['players']['right_player']['name']}",
         COLOR_RIGHT_PLAYER,
         Fonts.SCORE,
         right_player_rect,
         align=Align.LEFT
     )
-    right_logo_rect = right_text_rect.copy()
-    right_logo_rect.width = Images.SCORE_LOGOS['right_player'].get_width() / SQUARESIZE
-    right_logo_rect.left = right_text_rect.right
-    right_logo_rect.top = -.04
-    right_logo_rect = draw_image(Images.SCORE_LOGOS['right_player'], right_logo_rect)
-    draw_piece(right_logo_rect.right, -.06, COLOR_RIGHT_PLAYER, scale=.75)
+    draw_piece(right_text_rect.right, -.06, COLOR_RIGHT_PLAYER, scale=.75)
