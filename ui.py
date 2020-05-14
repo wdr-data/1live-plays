@@ -55,16 +55,26 @@ class Images:
     SCORE_LOGOS = {
         player: pygame.transform.smoothscale(
             surf,
-            (int(surf.get_width() *  SQUARESIZE / surf.get_height()), SQUARESIZE)
+            (int(surf.get_width() * SQUARESIZE / surf.get_height()), SQUARESIZE)
+        )
+        for player, surf in LOGOS.items()
+    }
+    STATUS_LOGOS = {
+        player: pygame.transform.smoothscale(
+            surf,
+            (
+                int(4 * SQUARESIZE),
+                int(surf.get_height() * 4 * SQUARESIZE / surf.get_width()),
+            )
         )
         for player, surf in LOGOS.items()
     }
 
 class Positions:
     SCORE_HEIGHT = 1.0
-    CURRENT_PLAYER_LEFT_PLAYER_LEFT = .1
-    CURRENT_PLAYER_RIGHT_PLAYER_LEFT = 11.6
-    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 4.4, 2)
+    CURRENT_PLAYER_LEFT_PLAYER_LEFT = .25
+    CURRENT_PLAYER_RIGHT_PLAYER_LEFT = 11.75
+    CURRENT_PLAYER = SquareRect(0, BOARD_OFFSET_Y, 4, 2)
     GAME_END = SquareRect(0, 1, 16, 1)
     CURRENT_VOTE = SquareRect(BOARD_OFFSET_X, 1, game.COLUMN_COUNT, 1)
     COUNTDOWN = SquareRect(0, 5.5, 4.4, 2)
@@ -135,6 +145,7 @@ def draw_piece(left, top, color, scale=1):
 
 def draw_image(source, rect):
     draw_erase(rect)
+
     return SquareRect.from_rect(
         screen.blit(source, rect.get_rect(SQUARESIZE)),
         SQUARESIZE,
@@ -210,7 +221,7 @@ def draw_current_player(turn):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_hack_text(text, color, Fonts.STATUS_LARGE[turn], square_rect_text)
+    draw_image(Images.STATUS_LOGOS[turn], square_rect_text)
 
     square_rect_text.height = 1
     square_rect_erase.height = 1
