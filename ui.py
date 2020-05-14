@@ -46,7 +46,7 @@ class Fonts:
     COUNTDOWN = pygame.ftfont.Font(
         "fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5)
     )
-    STATUS = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 4) * 3))
+    STATUS = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 5) * 3))
     STATUS_LARGE = {
         name: pygame.ftfont.Font(
             "fonts/WDRSansUL-ExtraBold.otf",
