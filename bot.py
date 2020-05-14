@@ -10,19 +10,23 @@ from googleapiclient.errors import HttpError
 from game_logic import COLUMN_COUNT
 from config import config
 
-class Event():
+
+class Event:
     def __init__(self, bot, column, voter=None):
         self.bot = bot
         self.column = column
         self.voter = voter
 
-class DemocracyMode():
+
+class DemocracyMode:
     def __init__(self, bot):
         self.bot = bot
         self.queue_in = Queue()
 
-        self.one_vote_per_person = config['app'].get('one_vote_per_person', True)
-        self.prevent_switching_sides = config['app'].get('prevent_switching_sides', False)
+        self.one_vote_per_person = config["app"].get("one_vote_per_person", True)
+        self.prevent_switching_sides = config["app"].get(
+            "prevent_switching_sides", False
+        )
 
         self.opponent = None
 
@@ -80,15 +84,22 @@ class DemocracyMode():
                     logging.debug(f'"{self.bot.player}" voting for {event.column + 1}')
 
                     # Prevent switching sides
-                    if self.prevent_switching_sides and self.opponent.has_voted_this_game(event.voter):
-                        logging.debug(f'Ignoring vote for {self.bot.player} from opponent player {event.voter}')
+                    if (
+                        self.prevent_switching_sides
+                        and self.opponent.has_voted_this_game(event.voter)
+                    ):
+                        logging.debug(
+                            f"Ignoring vote for {self.bot.player} from opponent player {event.voter}"
+                        )
                         continue
 
                     self.voters_this_game.add(event.voter)
 
                     # Clear previous vote
                     if self.one_vote_per_person and event.voter in self.voters:
-                        logging.debug(f'Reverting previous vote for {self.bot.player} from player {event.voter}')
+                        logging.debug(
+                            f"Reverting previous vote for {self.bot.player} from player {event.voter}"
+                        )
                         vote = self.voters[event.voter]
                         self.votes[vote] -= 1
 
@@ -96,11 +107,11 @@ class DemocracyMode():
                     self.voters[event.voter] = event.column
 
 
-class Bot():
+class Bot:
     def __init__(self, player, queue=None):
         self.player = player
-        self.player_config = config['players'][player]
-        self.youtube = build('youtube', 'v3', developerKey=config['app']['api_key'])
+        self.player_config = config["players"][player]
+        self.youtube = build("youtube", "v3", developerKey=config["app"]["api_key"])
         self.queue = queue
 
     def start_polling(self):
@@ -113,8 +124,8 @@ class Bot():
         for batch in self.messages():
             events = []
             for message in batch:
-                text = message['text']
-                author = message['author']
+                text = message["text"]
+                author = message["author"]
 
                 try:
                     column = int(text)
@@ -131,10 +142,12 @@ class Bot():
             self.queue.put(events)
 
     def messages(self):
-        request = self.youtube.videos().list(part='liveStreamingDetails', id=self.player_config['video_id'])
+        request = self.youtube.videos().list(
+            part="liveStreamingDetails", id=self.player_config["video_id"]
+        )
         response = request.execute()
 
-        live_chat_id = response['items'][0]['liveStreamingDetails']['activeLiveChatId']
+        live_chat_id = response["items"][0]["liveStreamingDetails"]["activeLiveChatId"]
         page_token = None
         first_run = True
 
@@ -149,25 +162,27 @@ class Bot():
 
                 response = request.execute()
 
-                page_token = response['nextPageToken']
+                page_token = response["nextPageToken"]
 
                 if first_run:
                     first_run = False
-                    sleep(response['pollingIntervalMillis'] / 1000)
+                    sleep(response["pollingIntervalMillis"] / 1000)
                     continue
 
-                items = response['items']
+                items = response["items"]
 
                 yield [
                     {
-                        'author': item['snippet']['authorChannelId'],
-                        'text': item['snippet']['textMessageDetails']['messageText'],
+                        "author": item["snippet"]["authorChannelId"],
+                        "text": item["snippet"]["textMessageDetails"]["messageText"],
                     }
                     for item in items
                 ]
 
-                polling_interval = response['pollingIntervalMillis'] / 1000
-                logging.debug(f'Bot "{self.player}" sleeping {round(polling_interval, 2)}s')
+                polling_interval = response["pollingIntervalMillis"] / 1000
+                logging.debug(
+                    f'Bot "{self.player}" sleeping {round(polling_interval, 2)}s'
+                )
                 sleep(polling_interval)
 
             except Exception:
@@ -175,8 +190,9 @@ class Bot():
                 sleep(10)
                 continue
 
-if __name__ == '__main__':
-    bot = Bot('left_player')
+
+if __name__ == "__main__":
+    bot = Bot("left_player")
 
     for message in bot.messages():
         print(message)

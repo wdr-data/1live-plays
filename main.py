@@ -8,11 +8,10 @@ from queue import Queue
 import logging
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
 )
-logging.getLogger('googleapiclient.discovery').setLevel(logging.ERROR)
-logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
+logging.getLogger("googleapiclient.discovery").setLevel(logging.ERROR)
+logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 import pygame
 
@@ -23,50 +22,63 @@ import ui
 from bot import Bot, Event, DemocracyMode
 from config import config
 
-class GameModes(Enum):
-    DEMOCRACY = 'democracy'
-    FIRST_COME_FIRST_SERVE = 'first_come_first_serve'
 
-DEBUG = config['app']['debug']
-MODE = GameModes(config['app']['game_mode'])
+class GameModes(Enum):
+    DEMOCRACY = "democracy"
+    FIRST_COME_FIRST_SERVE = "first_come_first_serve"
+
+
+DEBUG = config["app"]["debug"]
+MODE = GameModes(config["app"]["game_mode"])
 DEMOCRACY_TIMEOUT = 15
 
 if DEBUG:
     MODE = GameModes.FIRST_COME_FIRST_SERVE
 
-SAVEGAME = 'score.json'
+SAVEGAME = "score.json"
 
 MAX_TURNS = game.ROW_COUNT * game.COLUMN_COUNT
 
 try:
-    with open(SAVEGAME, 'r') as fp:
+    with open(SAVEGAME, "r") as fp:
         score = json.load(fp)
 except FileNotFoundError:
-    logging.warning('No savegame found.')
+    logging.warning("No savegame found.")
     score = {
-        'left_player': 0,
-        'right_player': 0,
+        "left_player": 0,
+        "right_player": 0,
     }
 
 game_over = False
-turn = 'left_player'
+turn = "left_player"
 turn_count = 0
 no_votes = False
 
+
 def get_current_player_number():
     global turn
-    return 1 if turn == 'left_player' else 2
+    return 1 if turn == "left_player" else 2
+
 
 def switch_turn():
     global turn
-    turn = 'left_player' if turn == 'right_player' else 'right_player'
+    turn = "left_player" if turn == "right_player" else "right_player"
+
 
 def game_loop(event):
     global turn, turn_count, game_over
 
     if DEBUG:
         # Programm Exit
-        number_keys = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
+        number_keys = [
+            pygame.K_1,
+            pygame.K_2,
+            pygame.K_3,
+            pygame.K_4,
+            pygame.K_5,
+            pygame.K_6,
+            pygame.K_7,
+        ]
         if event.type == pygame.QUIT:
             sys.exit()
 
@@ -129,27 +141,28 @@ else:
     logging.info(f'Starting gamemode "{MODE.value}"...')
 
     if MODE is GameModes.FIRST_COME_FIRST_SERVE:
-        logging.debug('Connecting bots...')
+        logging.debug("Connecting bots...")
         queue = Queue()
         bots = {}
-        for player in config['players']:
+        for player in config["players"]:
             bots[player] = Bot(player, queue)
 
         for bot in bots.values():
             bot.start_polling()
     elif MODE is GameModes.DEMOCRACY:
-        logging.debug('Connecting bots...')
+        logging.debug("Connecting bots...")
 
         democracies = {}
-        for player in config['players']:
+        for player in config["players"]:
             bot = Bot(player)
             democracies[player] = DemocracyMode(bot)
 
-        democracies['left_player'].opponent = democracies['right_player']
-        democracies['right_player'].opponent = democracies['left_player']
+        democracies["left_player"].opponent = democracies["right_player"]
+        democracies["right_player"].opponent = democracies["left_player"]
 
         for democracy in democracies.values():
             democracy.start()
+
 
 def mode_first_come_first_serve():
     global queue
@@ -157,6 +170,7 @@ def mode_first_come_first_serve():
         game_loop(event)
         if game_over:
             break
+
 
 def mode_democracy():
     global turn, democracies, no_votes
@@ -171,7 +185,9 @@ def mode_democracy():
         if current_vote is not None:
             ui.draw_current_vote(current_vote, turn)
 
-        ui.draw_countdown(turn, time_left, no_votes and time_left + 1 >= DEMOCRACY_TIMEOUT)
+        ui.draw_countdown(
+            turn, time_left, no_votes and time_left + 1 >= DEMOCRACY_TIMEOUT
+        )
         pygame.display.update()
         if time_left:
             sleep(1)
@@ -187,6 +203,7 @@ def mode_democracy():
     game_loop(event)
     ui.draw_erase(ui.Positions.CURRENT_VOTE)
 
+
 sleep(1)
 
 while True:
@@ -198,7 +215,7 @@ while True:
 
     left_player_first = not left_player_first
     game_over = False
-    turn = 'left_player' if left_player_first else 'right_player'
+    turn = "left_player" if left_player_first else "right_player"
     turn_count = 0
     no_votes = False
 
@@ -217,5 +234,5 @@ while True:
         elif MODE is GameModes.DEMOCRACY:
             mode_democracy()
 
-    with open(SAVEGAME, 'w') as fp:
+    with open(SAVEGAME, "w") as fp:
         json.dump(score, fp)
