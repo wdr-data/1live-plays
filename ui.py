@@ -38,21 +38,54 @@ else:
 
 
 class Fonts:
-    SCORE = pygame.ftfont.Font(
+    VOFFSET = {"left_player": 0.08 / SQUARESIZE, "right_player": -0.035 / SQUARESIZE}
+    HOFFSET = {"left_player": 0, "right_player": 0.05 / SQUARESIZE}
+
+    SCORE = {
+        "left_player": pygame.ftfont.Font(
+            "fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3)
+        ),
+        "right_player": pygame.ftfont.Font(
+            "fonts/Barlow-Bold.otf", int((SQUARESIZE / 4) * 2.9)
+        ),
+    }
+    NUMBERS = pygame.ftfont.Font(
         "fonts/WDRSansUL-ExtraBold.otf", int((SQUARESIZE / 4) * 3)
     )
-    NUMBERS = SCORE
     GAME_END = SCORE
-    COUNTDOWN = pygame.ftfont.Font(
-        "fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5)
-    )
-    STATUS = pygame.ftfont.Font("fonts/WDRSans-Bold.otf", int((SQUARESIZE / 5) * 3))
+    COUNTDOWN = {
+        "left_player": pygame.ftfont.Font(
+            "fonts/WDRSansUL-ExtraBold.otf", int(SQUARESIZE * 1.5)
+        ),
+        "right_player": pygame.ftfont.Font(
+            "fonts/Barlow-Bold.otf", int(SQUARESIZE * 1.5)
+        ),
+    }
+    STATUS = {
+        "left_player": pygame.ftfont.Font(
+            "fonts/WDRSans-Bold.otf", int((SQUARESIZE / 5) * 3)
+        ),
+        "right_player": pygame.ftfont.Font(
+            "fonts/Barlow-Bold.otf", int((SQUARESIZE / 5) * 3)
+        ),
+    }
     STATUS_LARGE = {
-        name: pygame.ftfont.Font(
+        "left_player": pygame.ftfont.Font(
             "fonts/WDRSansUL-ExtraBold.otf",
-            int((SQUARESIZE / 4) * 5 * (5 / len(player["name"]))),
-        )
-        for name, player in config["players"].items()
+            int(
+                (SQUARESIZE / 4)
+                * 5
+                * (5 / len(config["players"]["left_player"]["name"]))
+            ),
+        ),
+        "right_player": pygame.ftfont.Font(
+            "fonts/Barlow-Bold.otf",
+            int(
+                (SQUARESIZE / 4)
+                * 5
+                * (5 / len(config["players"]["right_player"]["name"]))
+            ),
+        ),
     }
 
 
@@ -222,12 +255,12 @@ def draw_column_labels():
 def draw_game_end(turn, tie=False):
     if tie:
         color = COLOR_BOARD
-        text = "Unentschieden!"
+        text = "Unentschieden!".upper()
     else:
         color = config["players"][turn]["color"]
-        text = f"{config['players'][turn]['name']} gewinnt!"
+        text = f"{config['players'][turn]['name']} gewinnt!".upper()
 
-    draw_hack_text(text, color, Fonts.GAME_END, Positions.GAME_END)
+    draw_hack_text(text, color, Fonts.GAME_END[turn], Positions.GAME_END)
 
 
 def draw_current_player(turn):
@@ -248,14 +281,19 @@ def draw_current_player(turn):
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    draw_image(Images.STATUS_LOGOS[turn], square_rect_logo, vertical_align="bottom")
+    draw_image(Images.STATUS_LOGOS[turn], square_rect_logo, vertical_align="center")
 
-    square_rect_logo.height = 1
+    font = Fonts.STATUS[turn]
+    font_voffset = font.get_height() * Fonts.VOFFSET[turn]
+
+    square_rect_text = square_rect_logo.copy()
+
+    square_rect_text.height = 1
     square_rect_erase.height = 1
-    square_rect_logo.top += 3
+    square_rect_text.top += 3 + font_voffset
     square_rect_erase.top += 3
     draw_erase(square_rect_erase)
-    draw_text("ist dran", color, Fonts.STATUS, square_rect_logo)
+    draw_text("ist dran", color, font, square_rect_text)
 
 
 def draw_countdown(turn, time_left, no_votes_message):
@@ -268,51 +306,71 @@ def draw_countdown(turn, time_left, no_votes_message):
         text_left = Positions.CURRENT_PLAYER_RIGHT_PLAYER_LEFT
         erase_left = Positions.CURRENT_PLAYER_LEFT_PLAYER_LEFT
 
+    font = Fonts.COUNTDOWN[turn]
+    font_voffset = font.get_height() * Fonts.VOFFSET[turn]
+
     square_rect_text = Positions.COUNTDOWN.copy()
     square_rect_text.left = text_left
+    square_rect_text.top += font_voffset
 
     square_rect_erase = Positions.COUNTDOWN.copy()
     square_rect_erase.left = erase_left
 
     draw_erase(square_rect_erase)
-    square_rect_countdown = draw_text(
-        str(time_left), color, Fonts.COUNTDOWN, square_rect_text
-    )
+    square_rect_countdown = draw_text(str(time_left), color, font, square_rect_text)
     square_rect_countdown.top = square_rect_countdown.bottom - 0.15
     square_rect_countdown.height = 0.1
     draw_erase(square_rect_countdown)
 
-    square_rect_text.top = square_rect_text.bottom
+    # No votes text
+    font = Fonts.STATUS[turn]
+    font_voffset = font.get_height() * Fonts.VOFFSET[turn]
+
+    square_rect_text.top = 8 + font_voffset
     square_rect_text.height = 1
     draw_erase(square_rect_text, color=BLACK)
 
     if no_votes_message:
-        draw_text("Keine Votes!", color, Fonts.STATUS, square_rect_text)
+        draw_text("Keine Votes!", color, font, square_rect_text)
 
 
 def draw_scoreboard(score):
-    colon_rect = SquareRect(7.85, 0, 0.3, Positions.SCORE_HEIGHT)
-    draw_hack_text(":", COLOR_BOARD, Fonts.SCORE, colon_rect)
+    player = "left_player"
+    font = Fonts.SCORE[player]
+    font_voffset = font.get_height() * Fonts.VOFFSET[player]
+    font_hoffset = font.get_height() * Fonts.HOFFSET[player]
 
-    left_player_rect = SquareRect(0, 0, colon_rect.left, Positions.SCORE_HEIGHT)
-    left_player_rect.right = colon_rect.left
+    colon_rect = SquareRect(7.85, font_voffset, 0.3, Positions.SCORE_HEIGHT)
+    draw_hack_text(":", COLOR_BOARD, font, colon_rect)
+
+    left_player_rect = SquareRect(
+        0, font_voffset, colon_rect.left, Positions.SCORE_HEIGHT,
+    )
+    left_player_rect.right = colon_rect.left - font_hoffset
     left_text_rect = draw_hack_text(
-        f"{config['players']['left_player']['name']} {score['left_player']}",
+        f"{config['players'][player]['name']} {score[player]}",
         COLOR_LEFT_PLAYER,
-        Fonts.SCORE,
+        Fonts.SCORE[player],
         left_player_rect,
         align=Align.RIGHT,
     )
-    draw_piece(left_text_rect.left - 1, -0.06, COLOR_LEFT_PLAYER, scale=0.75)
+    draw_piece(left_text_rect.left - 1, 0, COLOR_LEFT_PLAYER, scale=0.75)
 
+    player = "right_player"
+    font = Fonts.SCORE[player]
+    font_voffset = font.get_height() * Fonts.VOFFSET[player]
+    font_hoffset = font.get_height() * Fonts.HOFFSET[player]
     right_player_rect = SquareRect(
-        colon_rect.right + 0.01, 0, colon_rect.left, Positions.SCORE_HEIGHT,
+        colon_rect.right + 0.01 + font_hoffset,
+        font_voffset,
+        colon_rect.left,
+        Positions.SCORE_HEIGHT,
     )
     right_text_rect = draw_hack_text(
-        f"{score['right_player']} {config['players']['right_player']['name']}",
+        f"{score[player]} {config['players'][player]['name']}",
         COLOR_RIGHT_PLAYER,
-        Fonts.SCORE,
+        font,
         right_player_rect,
         align=Align.LEFT,
     )
-    draw_piece(right_text_rect.right, -0.06, COLOR_RIGHT_PLAYER, scale=0.75)
+    draw_piece(right_text_rect.right, 0, COLOR_RIGHT_PLAYER, scale=0.75)
