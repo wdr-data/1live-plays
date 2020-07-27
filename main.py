@@ -2,6 +2,7 @@ import math
 import sys
 import os
 import json
+import random
 from time import time, sleep
 from enum import Enum
 from queue import Queue
@@ -132,7 +133,6 @@ def game_loop(event):
         ui.draw_erase(ui.Positions.GAME_END)
 
 
-left_player_first = False
 ui.draw_scoreboard(score)
 
 if DEBUG:
@@ -206,6 +206,8 @@ def mode_democracy():
 
 sleep(1)
 
+turn = random.choice(["left_player", "right_player"])
+
 while True:
     game.create_board()
 
@@ -213,9 +215,8 @@ while True:
     ui.draw_column_labels()
     pygame.display.update()
 
-    left_player_first = not left_player_first
     game_over = False
-    turn = "left_player" if left_player_first else "right_player"
+    turn = "left_player" if turn == "right_player" else "right_player"
     turn_count = 0
     no_votes = False
 
