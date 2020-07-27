@@ -3,6 +3,7 @@
         "debug": false,
         "api_key": "",
         "game_mode": "democracy",
+        "democracy_timeout": 15,
         "one_vote_per_person": true,
         "prevent_switching_sides": false
     },

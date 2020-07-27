@@ -30,7 +30,7 @@ class GameModes(Enum):
 
 DEBUG = config["app"]["debug"]
 MODE = GameModes(config["app"]["game_mode"])
-DEMOCRACY_TIMEOUT = 15
+DEMOCRACY_TIMEOUT = config["app"].get("democracy_timeout", 15)
 
 if DEBUG:
     MODE = GameModes.FIRST_COME_FIRST_SERVE
