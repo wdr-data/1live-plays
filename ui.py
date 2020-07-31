@@ -166,6 +166,11 @@ def draw_text(text, color, font, square_rect, align=Align.CENTER):
 
 
 def draw_hack_text(text, color, font, square_rect, align=Align.CENTER):
+    """
+    We need this for the WDRSansUL font, because that is the only font with correct numbers,
+    but also has weird underlines baked into the font.
+    So we draw the text and then erase the underline as a hack.
+    """
     text_rect = draw_text(text, color, font, square_rect, align=align)
     erase_rect = text_rect.copy()
     erase_rect.top = erase_rect.bottom - 0.11 * text_rect.height
