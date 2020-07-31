@@ -206,7 +206,7 @@ def mode_democracy():
 
 sleep(1)
 
-turn = random.choice(["left_player", "right_player"])
+first_turn = random.choice(["left_player", "right_player"])
 
 while True:
     game.create_board()
@@ -216,7 +216,8 @@ while True:
     pygame.display.update()
 
     game_over = False
-    turn = "left_player" if turn == "right_player" else "right_player"
+    turn = first_turn
+    first_turn = "left_player" if first_turn == "right_player" else "right_player"
     turn_count = 0
     no_votes = False
 
